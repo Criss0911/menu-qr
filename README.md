@@ -1,0 +1,94 @@
+# Menú QR — MVP multi-restaurante
+
+Frontend estático en HTML/CSS/JavaScript; Supabase para autenticación y PostgreSQL con RLS. Sin compilación ni servidor propio. Demo Fast Burger con seis productos y seis mesas.
+
+## Abrir la demo
+
+Instala Node.js si no lo tienes. Abre una terminal en esta carpeta y ejecuta:
+
+```sh
+npm start
+```
+
+Visita http://127.0.0.1:4173/?r=fastburger&m=2. No abras index.html con doble clic: los módulos JavaScript necesitan HTTP. Pruebas de lógica: `npm test`. No hace falta `npm install` para la demo ni esas pruebas.
+
+La demo es explícita (`demo: true`), no pide cuentas, no permite administrar y no envía pedidos reales. No sustituye errores de Supabase por datos ficticios.
+
+## Conectar Supabase
+
+1. Crea un proyecto en [Supabase](https://supabase.com). Guarda su contraseña de base de datos fuera del repositorio.
+2. En SQL Editor ejecuta, en orden, `sql/01-schema.sql` y `sql/02-demo.sql`. El esquema se ejecuta una sola vez sobre un proyecto nuevo; está envuelto en una transacción. No lo ejecutes sobre tablas de otro proyecto. La demo se puede repetir.
+3. En Authentication → Users crea un usuario administrador con correo y contraseña. Para el primer acceso puedes usar la opción de crear usuario y confirmar su correo desde el panel.
+4. Copia el UUID del usuario y adapta las sentencias comentadas de `sql/03-bootstrap.example.sql`. Asigna Super Admin o solo Fast Burger. No pegues literalmente el marcador UUID.
+5. En Authentication → URL Configuration configura Site URL y las Redirect URLs con la dirección final de `admin.html`. Para pruebas añade `http://127.0.0.1:4173/admin.html`. Mantén HTTPS en producción. Desactiva el registro público si solo usarás cuentas creadas por el administrador.
+6. En configuración/API del proyecto copia la URL y la clave pública **anon** (o publishable). Edita `config.js`:
+   ```js
+   export const config = Object.freeze({
+     supabaseUrl: 'https://TU-PROYECTO.supabase.co',
+     supabaseAnonKey: 'TU-CLAVE-PUBLICA',
+     demo: false
+   });
+   ```
+7. Abre `admin.html`, inicia sesión y edita Datos del restaurante. Configura WhatsApp con código de país, sin + ni espacios (ejemplo de formato: 591 seguido del número real). No se incluye un teléfono ficticio.
+8. Edita categorías y productos; crea mesas y descarga sus QR. Imprime los QR generados desde la URL final publicada, **no desde localhost**.
+
+El restablecimiento de contraseña usa el correo de Supabase. Configura SMTP y revisa las cuotas de correo antes de invitar clientes; prueba el enlace de recuperación desde la URL autorizada. Las claves secretas, service_role y contraseñas NUNCA van en config.js, GitHub ni el navegador.
+
+## Uso del panel
+
+- **Productos:** crear, editar, ocultar y eliminar; precio, categoría, orden e imagen HTTPS.
+- **Categorías:** nombre, orden y visibilidad. Antes de eliminar una categoría, mueve o elimina sus productos; la base de datos impide huérfanos.
+- **Mesas y QR:** número único por restaurante, activar/desactivar, descargar QR SVG o imprimir.
+- **Datos:** nombre, slug, descripción, dirección, WhatsApp, logo, portada y publicación. Cambiar slug requiere regenerar los QR.
+- **Super Admin:** crear/editar/eliminar restaurantes y asignar/revocar accesos mediante UUID de usuarios ya creados en Supabase Auth. No crea cuentas Auth desde el navegador. Eliminar un restaurante con productos puede requerir eliminar primero los productos por las restricciones de integridad; el panel muestra el error y la operación es atómica.
+- Un usuario puede administrar varios restaurantes; selecciona el restaurante antes de editar.
+- La moneda de este MVP es BOB, presentada como Bs. No hay conversión monetaria.
+- Las imágenes son URLs HTTPS externas; el MVP no incluye subida a Storage. Usa imágenes propias o autorizadas.
+
+## Seguridad y límites del MVP
+
+La clave pública identifica la aplicación: **la seguridad depende de RLS**, no de ocultarla. El menú publicado es público por diseño, también para administradores de otros restaurantes. Los catálogos ocultos y todas las escrituras se restringen por membresía. No se almacenan datos privados dentro de las tablas del menú.
+
+RLS protege restaurantes, categorías, productos, mesas y miembros. La tabla de Super Admin está en un esquema privado sin permisos de tabla para clientes. Las funciones auxiliares usan nombres calificados y search_path vacío; ese esquema no debe añadirse a los esquemas expuestos de la API. Ningún rol se obtiene de user_metadata. El navegador no puede conceder Super Admin. Las escrituras verifican tanto la fila original como la nueva. Una clave foránea compuesta impide asociar productos a categorías de otro restaurante, y los disparadores impiden cambiar su restaurante.
+
+El pedido se compone localmente y se abre en WhatsApp: **no se guarda como pedido en la base de datos**, no hay pagos, inventario, historial ni confirmación automática. Se vuelven a consultar disponibilidad, mesa y precio antes de continuar. Los mensajes WhatsApp y números de mesa son editables por el cliente: el restaurante debe confirmar el pedido. El QR identifica una mesa, no prueba presencia física.
+
+El carrito queda en este navegador, separado por slug. La sesión del administrador la gestiona Supabase. Evita equipos compartidos y cierra sesión al terminar. Se escapa texto introducido por usuarios y solo se aceptan imágenes HTTPS. Las bibliotecas de autenticación y QR se cargan de esm.sh con versiones fijadas; las fuentes se cargan de Google Fonts con alternativa local. Una caída de esos servicios puede afectar al panel/QR, pero la demo básica usa archivos locales.
+
+## Publicar una demostración en GitHub Pages
+
+**Limitación de alojamiento:** GitHub Pages restringe negocios online, comercio electrónico y SaaS comerciales. Esta plataforma prepara pedidos comerciales; usa Pages para una demostración y elige alojamiento apto antes de operarla como negocio. El frontend puede copiarse sin cambios a otro hosting estático; actualiza las URLs de Auth y regenera los QR. Fuente: [GitHub Pages limits](https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits).
+
+1. Crea un repositorio y sube el contenido de esta carpeta (index.html en la raíz), incluyendo `.nojekyll`. No subas el ZIP dentro del sitio.
+2. En Settings → Pages selecciona Deploy from a branch, rama main, carpeta / (root), Save.
+3. Espera a que termine el despliegue. La URL tendrá la forma `https://TU-USUARIO.github.io/TU-REPO/`.
+4. Menú: `https://TU-USUARIO.github.io/TU-REPO/?r=fastburger`.
+5. Mesa: `https://TU-USUARIO.github.io/TU-REPO/?r=fastburger&m=2`.
+6. Panel: `https://TU-USUARIO.github.io/TU-REPO/admin.html`.
+7. Actualiza las URLs autorizadas en Supabase y prueba en incógnito y teléfono.
+
+Todas las rutas de archivos son relativas y funcionan en un subdirectorio de Pages. No necesitas rutas dinámicas, dominio propio ni claves privadas. El archivo config.js publicado es deliberadamente público.
+
+## Verificar antes de usar con clientes
+
+1. Con dos cuentas de restaurantes diferentes, confirma que A puede modificar A y no B; un catálogo público de B sí puede verse.
+2. Prueba peticiones directas a la API, no solo los botones: inserción con restaurante ajeno, cambio de restaurante, categoría ajena y modificación de membresías deben fallar.
+3. En incógnito, confirma que no se ven restaurantes/categorías/productos/mesas desactivados.
+4. Revoca la membresía de un usuario con sesión abierta y verifica que ya no puede guardar.
+5. Prueba recuperación de contraseña, QR físico, carrito, cambio de precios y apertura real de WhatsApp en móvil.
+6. Revisa el Security Advisor de Supabase, correo y límites de consumo. No se promete disponibilidad ni costo cero permanente; revisa los planes actuales antes de producción.
+
+## Archivos
+
+- index.html / assets/menu.js: experiencia del cliente.
+- admin.html / assets/admin.js: autenticación y administración.
+- assets/api.js: acceso a Supabase y datos de demostración.
+- assets/core.js: cálculos, mensaje y validación.
+- assets/style.css: diseño responsive.
+- config.js: configuración pública.
+- sql/: esquema, demo y asignación inicial de acceso.
+- tests/: pruebas de lógica y servidor local.
+- VALIDACION.md: resultados y alcance de las comprobaciones de entrega.
+
+Documentación oficial: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Auth](https://supabase.com/docs/guides/auth), [GitHub Pages](https://docs.github.com/en/pages).
+

@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "node tests/serve.mjs",
+    "test:security": "node tests/rls.mjs",
+    "test": "node --test tests/core.test.mjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8"
+  },
+  "name": "menu-qr",
+  "private": true,
+  "type": "module"
+}
