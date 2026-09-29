@@ -1,0 +1,12 @@
+-- Solo en el SQL Editor, nunca desde el navegador.
+-- 1. Crea la cuenta en Authentication > Users y copia su UUID.
+-- 2. Sustituye el UUID antes de ejecutar.
+-- Primer Super Admin:
+-- insert into private.superadmins(usuario_id) values ('UUID-DEL-USUARIO');
+-- Administrador de Fast Burger (sin Super Admin):
+-- insert into public.miembros(restaurante_id,usuario_id)
+-- values ('10000000-0000-4000-8000-000000000001','UUID-DEL-USUARIO');
+-- Los siguientes accesos a restaurantes se pueden asignar desde el panel Super Admin.
+-- Revocar Super Admin:
+-- delete from private.superadmins where usuario_id='UUID-DEL-USUARIO';
+
