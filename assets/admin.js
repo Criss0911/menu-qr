@@ -1,7 +1,8 @@
-import {client,result,demo} from './api.js?v=20260929-live';
+import {appearanceEditor} from './appearance-editor.js?v=appearance-1';
+import {client,result,demo} from './api.js?v=appearance-1';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
-const titles={productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',restaurantes:'Restaurantes',miembros:'Accesos'};
+const titles={productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',apariencia:'Apariencia',restaurantes:'Restaurantes',miembros:'Accesos'};
 const fields={
  productos:[['nombre','Nombre','text',true],['descripcion','Descripción','textarea'],['categoria_id','Categoría','select',true],['precio','Precio (Bs)','number',true],['imagen','Imagen (URL HTTPS)','url'],['orden','Orden','number'],['disponible','Disponible','checkbox']],
  categorias:[['nombre','Nombre','text',true],['orden','Orden','number'],['activo','Activa','checkbox']],
@@ -25,7 +26,7 @@ async function boot(){
  $('#login').hidden=true;$('#dashboard').hidden=false;$('#logout').hidden=false;
  $('#restaurantSelect').innerHTML=restaurants.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.nombre)+'</option>').join('');
  r=restaurants.find(x=>x.id===r?.id)||restaurants[0];if(r)$('#restaurantSelect').value=r.id;
- $('#sections').innerHTML=['productos','categorias','mesas','datos',...(superadmin?['restaurantes','miembros']:[])].map(s=>'<button data-section="'+s+'">'+titles[s]+'</button>').join('');
+ $('#sections').innerHTML=['productos','categorias','mesas','datos','apariencia',...(superadmin?['restaurantes','miembros']:[])].map(s=>'<button data-section="'+s+'">'+titles[s]+'</button>').join('');
  if(!r&&!superadmin){status('Tu cuenta no tiene un restaurante asignado. Contacta al administrador.');$('#content').textContent='Sin acceso asignado.';return;}
  if(!r)section='restaurantes';status('');await render();
 }
@@ -36,6 +37,10 @@ async function render(){
  document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('primary',b.dataset.section===section));
  if(!r&&section!=='restaurantes'){$('#content').textContent='Crea un restaurante para continuar.';return;}
  categories=r?await result(db.from('categorias').select('*').eq('restaurante_id',r.id).order('orden')):[];
+ if(section==='apariencia'){
+ $('#content').innerHTML='<h2>Apariencia</h2><p><a href="preview-postres.html" target="_blank" rel="noopener">Explorar ejemplo de fresas y postres ↗</a></p><p>Diseño y modo de atención de '+esc(r.nombre)+'</p><button id=editAppearance class=primary>Personalizar menú</button><p><a target="_blank" rel="noopener" href="index.html?r='+encodeURIComponent(r.slug)+'">Ver menú publicado ↗</a></p>';
+ $('#editAppearance').onclick=()=>{const restaurant=r;appearanceEditor(restaurant,openEditor,async payload=>{const changed=await result(db.from('restaurantes').update(payload).eq('id',restaurant.id).select('id'));if(!changed.length)throw Error('No se guardó: acceso revocado.');await boot();status('Apariencia guardada.');});};return;
+ }
  if(section==='datos'){rows=[r];$('#content').innerHTML='<h2>Datos del restaurante</h2><p>'+esc(r.nombre)+' · '+esc(r.slug)+'</p><p class="muted">Moneda del MVP: bolivianos (Bs). Cambiar el identificador invalida los QR anteriores.</p><button id="editData" class="primary">Editar datos</button><button id="generalQr">QR del menú</button>';$('#editData').onclick=()=>edit(r);$('#generalQr').onclick=()=>guarded(()=>showQr(null));return;}
  rows=section==='restaurantes'?restaurants:await result(db.from(section).select('*').eq('restaurante_id',r.id).order(section==='mesas'?'numero':section==='miembros'?'usuario_id':'orden'));
  $('#content').innerHTML='<div class="dialog-head"><h2>'+titles[section]+'</h2><button id="new" class="primary">+ Añadir</button></div>'+
@@ -45,6 +50,7 @@ async function render(){
  $('#content').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.edit!==undefined)edit(rows[Number(b.dataset.edit)]);if(b.dataset.delete!==undefined)guarded(()=>remove(rows[Number(b.dataset.delete)]));if(b.dataset.qr!==undefined)guarded(()=>showQr(rows[Number(b.dataset.qr)].numero));};
 }
 function openEditor(title,html,save){
+ $('#editForm').oninput=null;$('#editForm').onchange=null;
  $('#editorTitle').textContent=title;$('#editStatus').textContent='';$('#editForm').innerHTML=html+'<button class="primary wide">Guardar</button>';
  $('#editForm').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;try{await save(new FormData(e.target));$('#editor').close();}catch(e){$('#editStatus').textContent=e.message;}finally{b.disabled=false;}};
  if(!$('#editor').open)$('#editor').showModal();

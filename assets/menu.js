@@ -1,24 +1,27 @@
-import {demo,loadMenu} from './api.js?v=20260929-live';
+import {appearance,applyAppearance} from './appearance.js';
+import {demo,loadMenu,loadDessertDemo} from './api.js?v=appearance-1';
 import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js';
-const $=s=>document.querySelector(s);let data,mesa,cart={},active='all';const params=new URLSearchParams(location.search),slug=params.get('r')||'fastburger';const key='menuqr:'+slug;
+const $=s=>document.querySelector(s);let data,mesa,cart={},active='all',query='',theme;const params=new URLSearchParams(location.search),slug=params.get('r')||'fastburger';const key='menuqr:'+slug;
 function notify(t){$('#toast').textContent=t;setTimeout(()=>$('#toast').textContent='',2400);}
 try{
- mesa=tableNumber(params.get('m'));data=await loadMenu(slug);
+ data=document.body.dataset.preview==='postres'?await loadDessertDemo():await loadMenu(slug);theme=applyAppearance(data.restaurant);mesa=theme.catalog?null:tableNumber(params.get('m'));
  if(mesa&&!data.tables.some(t=>t.numero===mesa))throw Error('Esta mesa no está disponible. Pide un QR válido al personal.');
  try{const saved=JSON.parse(localStorage.getItem(key)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))cart=saved;}catch{}
  cart=Object.fromEntries(lines(cart,data.products).map(p=>[p.id,p.quantity]));
  const r=data.restaurant;document.title=r.nombre+' · Menú QR';
- $('#app').innerHTML=`<section class="hero"><div><p class="eyebrow">${demo?'DEMO INTERACTIVA':'MENÚ DIGITAL'} · ${mesa?'MESA '+mesa:'PARA RECOGER'}</p><h1>${esc(r.nombre)}<span>.</span></h1><p class="intro">${esc(r.descripcion)}</p><p class="address">${esc(r.direccion)}</p><div class="pill">● Preparado al momento</div></div><div class="hero-art" aria-hidden="true">🍔<span>HECHO CON<br>MUCHO SABOR</span></div></section><div class="menu-heading"><div><p class="eyebrow">ELIGE TUS FAVORITOS</p><h2>¿Qué se te antoja?</h2></div><span class="muted">Precios en bolivianos</span></div><nav id="categories" class="tabs" aria-label="Categorías"></nav><section id="products" class="grid" aria-label="Productos"></section><footer>Con sabor, sin complicaciones. <strong>${esc(r.nombre)}</strong></footer><button id="openCart" class="cartbar"></button>`;
+ $('#app').innerHTML=`<section class="hero"><div><p class="eyebrow">${theme.catalog?'CATÁLOGO DEL DÍA':demo?'DEMO INTERACTIVA':'MENÚ DIGITAL'}${theme.catalog?'':' · '+(mesa?'MESA '+mesa:'PARA RECOGER')}</p><h1>${esc(r.nombre)}<span>.</span></h1><p class="intro">${esc(r.descripcion)}</p><p class="address">${esc(r.direccion)}</p><div class="pill">${theme.catalog?'Explora nuestros productos':'● Preparado al momento'}</div></div><div class="hero-art" aria-hidden="true">${theme.emoji}<span>${esc(theme.tag)}</span></div></section><div class="menu-heading"><div><p class="eyebrow">ELIGE TUS FAVORITOS</p><h2>${esc(theme.title)}</h2></div><span class="muted">Precios en bolivianos</span></div>${theme.notice?'<p class="daily-notice">'+esc(theme.notice)+'</p>':''}${theme.catalog?'<p class="catalog-note">Catálogo informativo · consulta disponibilidad en el local.</p>':''}<label class="search-label">Buscar un antojo<input id="searchProducts" type="search" placeholder="Buscar por nombre o descripción…" maxlength="100"></label><nav id="categories" class="tabs" aria-label="Categorías"></nav><section id="products" class="grid" aria-label="Productos"></section><footer>Con sabor, sin complicaciones. <strong>${esc(r.nombre)}</strong></footer><button id="openCart" class="cartbar" ${theme.catalog?'hidden':''}></button>`;
  if(safeImage(r.portada))$('.hero-art').innerHTML='<img alt="" src="'+esc(safeImage(r.portada))+'">';
  if(safeImage(r.logo))$('.brand').innerHTML='<img class="logo" alt="" src="'+esc(safeImage(r.logo))+'">'+esc(r.nombre);
+ $('.brand').href='?r='+encodeURIComponent(slug);
+ $('#searchProducts').oninput=e=>{query=e.target.value.toLocaleLowerCase('es');renderProducts();};
  $('#categories').innerHTML=[{id:'all',nombre:'Todo el menú'},...data.categories].map(c=>'<button data-category="'+esc(c.id)+'">'+esc(c.nombre)+'</button>').join('');
  $('#categories').onclick=e=>{const b=e.target.closest('[data-category]');if(b){active=b.dataset.category;renderProducts();}};
- $('#products').onclick=e=>{const b=e.target.closest('[data-add]');if(b){cart[b.dataset.add]=Math.min(99,(cart[b.dataset.add]||0)+1);save();notify('Añadido a tu pedido');}};
+ $('#products').onclick=e=>{const b=e.target.closest('[data-add]');if(b&&!theme.catalog){cart[b.dataset.add]=Math.min(99,(cart[b.dataset.add]||0)+1);save();notify('Añadido a tu pedido');}};
  $('#openCart').onclick=()=>{renderCart();$('#cartDialog').showModal();};renderProducts();save();
 }catch(e){$('#app').innerHTML='<section class="empty"><h1>No podemos mostrar el menú</h1><p>'+esc(e.message)+'</p><a href="./?r=fastburger">Volver al inicio</a></section>';}
 function renderProducts(){
- const products=data.products.filter(p=>(active==='all'||p.categoria_id===active)&&data.categories.some(c=>c.id===p.categoria_id));
- $('#products').innerHTML=products.length?products.map(p=>`<article class="card"><div class="food">${safeImage(p.imagen)?'<img loading="lazy" alt="'+esc(p.nombre)+'" src="'+esc(safeImage(p.imagen))+'">':'<span aria-hidden="true">'+(p.emoji||'🍽️')+'</span>'}</div><div class="card-body"><h3>${esc(p.nombre)}</h3><p>${esc(p.descripcion)}</p><div class="card-bottom"><strong>${money(cents(p.precio))}</strong><button data-add="${esc(p.id)}" aria-label="Añadir ${esc(p.nombre)}">+ Añadir</button></div></div></article>`).join(''):'<p class="empty">Todavía no hay productos en esta categoría.</p>';
+ const products=data.products.filter(p=>(active==='all'||p.categoria_id===active)&&(p.nombre+' '+p.descripcion).toLocaleLowerCase('es').includes(query)&&data.categories.some(c=>c.id===p.categoria_id));
+ $('#products').innerHTML=products.length?products.map(p=>`<article class="card"><div class="food">${safeImage(p.imagen)?'<img loading="lazy" alt="'+esc(p.nombre)+'" src="'+esc(safeImage(p.imagen))+'">':'<span aria-hidden="true">'+esc(p.emoji||theme.emoji)+'</span>'}</div><div class="card-body"><h3>${esc(p.nombre)}</h3><p>${esc(p.descripcion)}</p><div class="card-bottom"><strong>${money(cents(p.precio))}</strong>${theme.catalog?'<span class="catalog-badge">En catálogo</span>':`<button data-add="${esc(p.id)}" aria-label="Añadir ${esc(p.nombre)}">+ Añadir</button>`}</div></div></article>`).join(''):'<p class="empty">Todavía no hay productos en esta categoría.</p>';
  document.querySelectorAll('[data-category]').forEach(b=>{b.classList.toggle('selected',b.dataset.category===active);b.setAttribute('aria-pressed',b.dataset.category===active);});
 }
 function save(){try{localStorage.setItem(key,JSON.stringify(cart));}catch{}const items=lines(cart,data.products);$('#openCart').textContent='🛍 '+items.reduce((s,p)=>s+p.quantity,0)+' productos · Ver mi pedido · '+money(items.reduce((s,p)=>s+p.subtotal,0));}
@@ -30,6 +33,7 @@ $('#checkout').onclick=async()=>{
  try{
   if(demo){$('#cartStatus').textContent='Demo: configura el WhatsApp del restaurante en el panel para enviar pedidos.';return;}
   const fresh=await loadMenu(slug),items=lines(cart,fresh.products);
+  if(appearance(fresh.restaurant).catalog){$('#openCart').hidden=true;throw Error('Este negocio ahora funciona como catálogo. No admite pedidos por este menú.');}
   if(mesa&&!fresh.tables.some(t=>t.numero===mesa))throw Error('La mesa ya no está disponible.');
   const old=lines(cart,data.products);
   const changed=JSON.stringify(items.map(p=>[p.id,p.precio,p.quantity]))!==JSON.stringify(old.map(p=>[p.id,p.precio,p.quantity]));
