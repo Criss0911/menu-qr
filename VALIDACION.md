@@ -22,7 +22,7 @@ Actualizado: 1 de octubre de 2026.
 
 ## Pendiente de comprobación
 
-Creación y asignación de la cuenta administradora, inicio de sesión/recuperación real de Auth, correo SMTP y apertura/envío efectivo en WhatsApp móvil. El teléfono real del restaurante aún no está configurado. No se ha enviado ningún pedido.
+Recuperación real de Auth, correo SMTP y apertura/envío efectivo en WhatsApp móvil. Cuenta administradora, inicio de sesión y guardado del teléfono real ya comprobados. No se ha enviado ningún pedido.
 
 PGlite valida PostgreSQL y las políticas, pero no replica toda la configuración de Supabase. La prueba del panel usa datos simulados y no demuestra por sí sola la integración de Auth. Realiza la lista de verificación de README.md antes de usar el sistema con clientes.
 
@@ -33,3 +33,10 @@ PGlite valida PostgreSQL y las políticas, pero no replica toda la configuració
 - `npm start`: sirve el sitio local; consulta Supabase con la configuración entregada. Para demo independiente, configura demo: true.
 
 Las pruebas de navegador se ejecutaron con las herramientas del entorno de entrega. No son necesarias para servir el sitio. El ZIP no contiene node_modules ni credenciales secretas.
+
+## Ampliación Apariencia
+
+- 10 pruebas de lógica pasan (incluyendo modo catálogo, valores de apariencia no válidos y demo aislada).
+- 20 comprobaciones PostgreSQL/RLS pasan; la migración se ejecuta dos veces, el propietario puede cambiar apariencia, otro restaurante no puede y colores/modos inválidos se rechazan.
+- Acceso real del Super Admin comprobado, seis productos y seis mesas visibles; QR de mesa 2 generado con URL publicada. Teléfono de WhatsApp configurado y guardado, sin envío de prueba.
+- Recuperación por correo y entrega efectiva en WhatsApp siguen sin verificarse.

@@ -6,7 +6,7 @@ Frontend estático en HTML/CSS/JavaScript; Supabase para autenticación y Postgr
 
 Publicado en https://criss0911.github.io/menu-qr/?r=fastburger y conectado al proyecto Supabase menuQR. Panel: https://criss0911.github.io/menu-qr/admin.html. El esquema y Fast Burger ya están cargados, con RLS habilitado. No vuelvas a ejecutar el esquema en este proyecto.
 
-Falta crear la cuenta de acceso a la aplicación y asignarle permisos, y configurar el WhatsApp real del restaurante. El inicio de sesión real del administrador sigue pendiente de comprobación. El archivo config.js contiene únicamente la URL y clave pública de este proyecto, con demo: false. Para reutilizar el código con otro proyecto, reemplaza ambas.
+La cuenta Super Admin, el inicio de sesión real, el QR y el guardado del WhatsApp ya están comprobados. La entrega incluye Apariencia y modo Solo catálogo. El archivo config.js contiene únicamente la URL y clave pública de este proyecto, con demo: false. Para reutilizar el código con otro proyecto, reemplaza ambas.
 
 ## Abrir localmente
 
@@ -23,7 +23,7 @@ La configuración entregada consulta Supabase también al abrir localmente. Para
 ## Conectar Supabase
 
 1. Crea un proyecto en [Supabase](https://supabase.com). Guarda su contraseña de base de datos fuera del repositorio.
-2. En SQL Editor ejecuta, en orden, `sql/01-schema.sql` y `sql/02-demo.sql`. El esquema se ejecuta una sola vez sobre un proyecto nuevo; está envuelto en una transacción. No lo ejecutes sobre tablas de otro proyecto. La demo se puede repetir.
+2. En SQL Editor ejecuta, en orden, `sql/01-schema.sql`, `sql/02-demo.sql` y `sql/04-apariencia.sql`. El esquema se ejecuta una sola vez sobre un proyecto nuevo; está envuelto en una transacción. No lo ejecutes sobre tablas de otro proyecto. La demo se puede repetir.
 3. En Authentication → Users crea un usuario administrador con correo y contraseña. Para el primer acceso puedes usar la opción de crear usuario y confirmar su correo desde el panel.
 4. Copia el UUID del usuario y adapta las sentencias comentadas de `sql/03-bootstrap.example.sql`. Asigna Super Admin o solo Fast Burger. No pegues literalmente el marcador UUID.
 5. En Authentication → URL Configuration configura Site URL y las Redirect URLs con la dirección final de `admin.html`. Para pruebas añade `http://127.0.0.1:4173/admin.html`. Mantén HTTPS en producción. Desactiva el registro público si solo usarás cuentas creadas por el administrador.
@@ -97,3 +97,15 @@ Todas las rutas de archivos son relativas y funcionan en un subdirectorio de Pag
 - VALIDACION.md: resultados y alcance de las comprobaciones de entrega.
 
 Documentación oficial: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Auth](https://supabase.com/docs/guides/auth), [GitHub Pages](https://docs.github.com/en/pages).
+
+## Apariencia y catálogo por negocio
+
+Ejecuta `sql/04-apariencia.sql` después del esquema inicial y antes de usar Apariencia. En proyectos existentes aplica solo esta migración; no repitas 01-schema.sql. Es repetible, mantiene RLS y deja los restaurantes actuales en pedidos por WhatsApp.
+
+En el panel selecciona el negocio → Apariencia → Personalizar menú. Elige Clásico, Fresas y postres o Café y artesanal; ajusta colores, título y aviso del día. La vista previa permite revisar antes de guardar. Usa colores oscuros para el principal y claros para el fondo para mantener buena lectura.
+
+Solo catálogo permite buscar y filtrar productos, sin carrito ni pedidos. Los administradores mantienen el control de edición mediante RLS. Actualiza diariamente Productos (Disponible) y el aviso; el público ve cambios al recargar. Cambiar después a Pedidos por WhatsApp conserva productos, enlace y QR. Estados de pedidos, entregas y seguimiento no están implementados todavía y requerirán tablas y permisos propios.
+
+`preview-postres.html` es una demostración independiente y explícita; sus productos y precios son ilustrativos. No crea un restaurante ni modifica Fast Burger. Sustituye el nombre, logo y productos al crear tu negocio real.
+
+Actualización de puesta en marcha: cuenta Super Admin activada, inicio de sesión real y QR comprobados; WhatsApp de Fast Burger guardado. No se ha enviado un pedido de prueba.
