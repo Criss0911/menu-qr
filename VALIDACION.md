@@ -1,6 +1,6 @@
 # Validación de entrega
 
-Fecha: 29 de septiembre de 2026.
+Actualizado: 1 de octubre de 2026.
 
 ## Comprobado localmente
 
@@ -12,9 +12,17 @@ Fecha: 29 de septiembre de 2026.
 - Inspección visual de capturas de escritorio y móvil. Se corrigió y volvió a probar la interpretación de imágenes vacías.
 - Panel con API simulada: creación y edición de productos, creación de mesas, asignación de membresías. Generación real de QR mediante la biblioteca fijada y descarga SVG; URL de restaurante y mesa verificada.
 
-## No comprobado contra servicios reales
+## Comprobado en los servicios reales
 
-No se proporcionaron credenciales ni proyecto Supabase o repositorio GitHub. No se crearon cuentas externas ni se publicó el sitio. Quedan pendientes: inicio de sesión/recuperación real de Auth, correo SMTP, Data API real, despliegue GitHub Pages y apertura/envío efectivo en WhatsApp móvil.
+- Repositorio Criss0911/menu-qr publicado con GitHub Pages y HTTPS.
+- Esquema y semilla ejecutados en Supabase menuQR; un restaurante, tres categorías, seis productos y seis mesas. RLS habilitado en las seis tablas.
+- Menú publicado carga los seis productos desde la Data API de Supabase.
+- Carrito publicado: dos unidades de La Clásica y unas papas suman Bs 68; bloqueo de continuación con aviso cuando falta WhatsApp. Se retiraron los artículos de prueba al terminar.
+- URL de Auth y redirección configuradas al panel publicado; registro público desactivado.
+
+## Pendiente de comprobación
+
+Creación y asignación de la cuenta administradora, inicio de sesión/recuperación real de Auth, correo SMTP y apertura/envío efectivo en WhatsApp móvil. El teléfono real del restaurante aún no está configurado. No se ha enviado ningún pedido.
 
 PGlite valida PostgreSQL y las políticas, pero no replica toda la configuración de Supabase. La prueba del panel usa datos simulados y no demuestra por sí sola la integración de Auth. Realiza la lista de verificación de README.md antes de usar el sistema con clientes.
 
@@ -22,7 +30,6 @@ PGlite valida PostgreSQL y las políticas, pero no replica toda la configuració
 
 - `npm test`: siete pruebas sin instalar dependencias.
 - `npm install` y `npm run test:security`: instala la dependencia de desarrollo PGlite y ejecuta las comprobaciones del SQL sin proyecto externo.
-- `npm start`: abre la demo local para pruebas manuales.
+- `npm start`: sirve el sitio local; consulta Supabase con la configuración entregada. Para demo independiente, configura demo: true.
 
 Las pruebas de navegador se ejecutaron con las herramientas del entorno de entrega. No son necesarias para servir el sitio. El ZIP no contiene node_modules ni credenciales secretas.
-

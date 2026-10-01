@@ -2,7 +2,13 @@
 
 Frontend estático en HTML/CSS/JavaScript; Supabase para autenticación y PostgreSQL con RLS. Sin compilación ni servidor propio. Demo Fast Burger con seis productos y seis mesas.
 
-## Abrir la demo
+## Estado de esta entrega (1 de octubre de 2026)
+
+Publicado en https://criss0911.github.io/menu-qr/?r=fastburger y conectado al proyecto Supabase menuQR. Panel: https://criss0911.github.io/menu-qr/admin.html. El esquema y Fast Burger ya están cargados, con RLS habilitado. No vuelvas a ejecutar el esquema en este proyecto.
+
+Falta crear la cuenta de acceso a la aplicación y asignarle permisos, y configurar el WhatsApp real del restaurante. El inicio de sesión real del administrador sigue pendiente de comprobación. El archivo config.js contiene únicamente la URL y clave pública de este proyecto, con demo: false. Para reutilizar el código con otro proyecto, reemplaza ambas.
+
+## Abrir localmente
 
 Instala Node.js si no lo tienes. Abre una terminal en esta carpeta y ejecuta:
 
@@ -12,7 +18,7 @@ npm start
 
 Visita http://127.0.0.1:4173/?r=fastburger&m=2. No abras index.html con doble clic: los módulos JavaScript necesitan HTTP. Pruebas de lógica: `npm test`. No hace falta `npm install` para la demo ni esas pruebas.
 
-La demo es explícita (`demo: true`), no pide cuentas, no permite administrar y no envía pedidos reales. No sustituye errores de Supabase por datos ficticios.
+La configuración entregada consulta Supabase también al abrir localmente. Para una demostración independiente, cambia explícitamente `demo: true` en config.js: no pide cuentas, no permite administrar y no envía pedidos reales. No sustituye errores de Supabase por datos ficticios. No publiques ese cambio si deseas conservar la conexión real.
 
 ## Conectar Supabase
 
@@ -91,4 +97,3 @@ Todas las rutas de archivos son relativas y funcionan en un subdirectorio de Pag
 - VALIDACION.md: resultados y alcance de las comprobaciones de entrega.
 
 Documentación oficial: [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Auth](https://supabase.com/docs/guides/auth), [GitHub Pages](https://docs.github.com/en/pages).
-
