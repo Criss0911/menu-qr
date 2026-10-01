@@ -1,4 +1,4 @@
-import {client,result,demo} from './api.js';
+import {client,result,demo} from './api.js?v=20260929-live';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
 const titles={productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',restaurantes:'Restaurantes',miembros:'Accesos'};
@@ -83,4 +83,5 @@ async function showQr(numero){
 $('#downloadQr').onclick=()=>{const url=URL.createObjectURL(new Blob([qrSvg],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=url;a.download='menu-qr.svg';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('#printQr').onclick=()=>window.print();$('#closeQr').onclick=()=>$('#qrDialog').close();$('#closeEditor').onclick=()=>$('#editor').close();
 start();
+
 

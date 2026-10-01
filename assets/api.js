@@ -1,4 +1,4 @@
-import {config} from '../config.js';
+import {config} from '../config.js?v=20260929-live';
 export const demo=config.demo;
 let instance;
 export async function client(){
@@ -18,8 +18,9 @@ export const demoProducts=[
  {id:'fries',categoria_id:'sides',nombre:'Papas doradas',descripcion:'Crujientes, recién hechas y con un toque de sal.',precio:12,emoji:'🍟'},
  {id:'lemon',categoria_id:'drinks',nombre:'Limonada de la casa',descripcion:'Limón fresco, hielo y un toque de hierbabuena.',precio:10,emoji:'🍋'}
 ].map((p,i)=>({...p,restaurante_id:'demo',disponible:true,orden:i,imagen:''}));
+export async function loadDemoMenu(slug){if(slug!=='fastburger')throw Error('Restaurante no encontrado.');return {restaurant:demoRestaurant,categories:demoCategories,products:demoProducts,tables:[1,2,3,4,5,6].map(numero=>({numero}))};}
 export async function loadMenu(slug){
- if(demo){if(slug!=='fastburger')throw Error('Restaurante no encontrado.');return {restaurant:demoRestaurant,categories:demoCategories,products:demoProducts,tables:[1,2,3,4,5,6].map(numero=>({numero}))};}
+ if(demo)return loadDemoMenu(slug);
  const c=await client();const restaurant=await result(c.from('restaurantes').select('*').eq('slug',slug).eq('activo',true).maybeSingle());
  if(!restaurant)throw Error('Restaurante no encontrado o no disponible.');
  const [categories,products,tables]=await Promise.all(['categorias','productos','mesas'].map(t=>result(c.from(t).select('*').eq('restaurante_id',restaurant.id).order(t==='mesas'?'numero':'orden'))));

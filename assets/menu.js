@@ -1,4 +1,4 @@
-import {demo,loadMenu} from './api.js';
+import {demo,loadMenu} from './api.js?v=20260929-live';
 import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let data,mesa,cart={},active='all';const params=new URLSearchParams(location.search),slug=params.get('r')||'fastburger';const key='menuqr:'+slug;
 function notify(t){$('#toast').textContent=t;setTimeout(()=>$('#toast').textContent='',2400);}
@@ -40,4 +40,5 @@ $('#checkout').onclick=async()=>{
   location.href='https://wa.me/'+data.restaurant.whatsapp+'?text='+encodeURIComponent(orderText(data.restaurant,mesa,items,$('#notes').value));
  }catch(e){$('#cartStatus').textContent=e.message;}finally{b.disabled=!lines(cart,data.products).length;}
 };
+
 
