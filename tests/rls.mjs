@@ -8,6 +8,8 @@ const db=new PGlite();
 await db.exec("create role anon; create role authenticated; create schema auth; create table auth.users(id uuid primary key); create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$; grant usage on schema auth to anon,authenticated; grant execute on function auth.uid() to anon,authenticated;");
 await db.exec(await readFile(new URL('sql/01-schema.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/02-demo.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/04-apariencia.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/04-apariencia.sql',root),'utf8'));
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',b='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',s='cccccccc-cccc-4ccc-8ccc-cccccccccccc',rid='10000000-0000-4000-8000-000000000001',ridB='10000000-0000-4000-8000-000000000002',catB='20000000-0000-4000-8000-000000000099';
 await db.exec(`insert into auth.users values ('${a}'),('${b}'),('${s}'); insert into public.restaurantes(id,nombre,slug,activo) values('${ridB}','Privado','privado',false); insert into public.categorias(id,restaurante_id,nombre) values('${catB}','${ridB}','Secreta'); insert into public.miembros values('${rid}','${a}'),('${ridB}','${b}'); insert into private.superadmins values('${s}');`);
 async function role(name,uid=''){await db.exec("reset role;");await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role '+name);}
@@ -19,6 +21,10 @@ assert.equal((await db.query('select * from public.productos')).rows.length,6);c
 await blocked("insert into public.restaurantes(nombre,slug) values('Hack','hack')");
 await blocked('select * from public.miembros');
 await role('authenticated',a);
+await db.exec(`update public.restaurantes set plantilla='berries',modo_atencion='catalogo' where id='${rid}'`);checks++;
+assert.equal((await db.query(`update public.restaurantes set plantilla='berries' where id='${ridB}' returning *`)).rows.length,0);checks++;
+await blocked(`update public.restaurantes set color_principal='url(evil)' where id='${rid}'`);
+await blocked(`update public.restaurantes set modo_atencion='delivery' where id='${rid}'`);
 assert.equal((await db.query('select * from public.miembros')).rows.length,1);checks++;
 await db.exec(`update public.productos set precio=29 where restaurante_id='${rid}'`);checks++;
 await blocked(`insert into public.categorias(restaurante_id,nombre) values('${ridB}','Hack')`);
