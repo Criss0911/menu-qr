@@ -1,10 +1,11 @@
-import {appearanceEditor} from './appearance-editor.js?v=appearance-1';
-import {client,result,demo} from './api.js?v=appearance-1';
+import {uploadPhoto,validatePhoto} from './upload.js';
+import {appearanceEditor} from './appearance-editor.js?v=products-2';
+import {client,result,demo} from './api.js?v=products-2';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
 const titles={productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',apariencia:'Apariencia',restaurantes:'Restaurantes',miembros:'Accesos'};
 const fields={
- productos:[['nombre','Nombre','text',true],['descripcion','Descripción','textarea'],['categoria_id','Categoría','select',true],['precio','Precio (Bs)','number',true],['imagen','Imagen (URL HTTPS)','url'],['orden','Orden','number'],['disponible','Disponible','checkbox']],
+ productos:[['nombre','Nombre','text',true],['descripcion','Descripción','textarea'],['categoria_id','Categoría','select',true],['precio','Precio (Bs)','number',true],['imagen','Imagen (URL HTTPS)','url'],['destacado','Carrusel','featured'],['orden','Orden','number'],['disponible','Disponible','checkbox']],
  categorias:[['nombre','Nombre','text',true],['orden','Orden','number'],['activo','Activa','checkbox']],
  mesas:[['numero','Número de mesa','number',true],['activo','Activa','checkbox']],
  datos:[['nombre','Nombre','text',true],['slug','Identificador en la URL','text',true],['descripcion','Descripción','textarea'],['direccion','Dirección','text'],['whatsapp','WhatsApp: código de país + número, solo dígitos','text'],['logo','Logo (URL HTTPS)','url'],['portada','Portada (URL HTTPS)','url'],['activo','Menú publicado','checkbox']],
@@ -62,19 +63,21 @@ function edit(row){
  const v=row?.[name]??(type==='checkbox'?true:type==='number'?0:'');const attr=required?' required':'';
  const bounds=type==='number'?' min="'+(name==='numero'?1:0)+'" max="'+(name==='numero'?9999:name==='precio'?999999:2147483647)+'" step="'+(name==='precio'?'.01':'1')+'"':'';
  const max=name==='descripcion'?500:name==='nombre'?100:name==='slug'?80:name==='direccion'?300:2048;
- return '<label>'+esc(label)+(type==='textarea'?'<textarea name="'+name+'" maxlength="'+max+'">'+esc(v)+'</textarea>':type==='select'?'<select name="'+name+'" required>'+categories.map(c=>'<option value="'+esc(c.id)+'" '+(c.id===v?'selected':'')+'>'+esc(c.nombre)+'</option>').join('')+'</select>':'<input name="'+name+'" type="'+type+'"'+attr+bounds+(type==='checkbox'?(v?' checked':''):' maxlength="'+max+'" value="'+esc(v)+'"')+'>')+'</label>';
- }).join('')+'</div>';
+ return '<label>'+esc(label)+(type==='textarea'?'<textarea name="'+name+'" maxlength="'+max+'">'+esc(v)+'</textarea>':type==='featured'?'<select name="destacado">'+[['','No destacar'],['novedad','Novedad'],['tendencia','En tendencia']].map(([key,title])=>'<option value="'+key+'" '+(v===key?'selected':'')+'>'+title+'</option>').join('')+'</select>':type==='select'?'<select name="'+name+'" required>'+categories.map(c=>'<option value="'+esc(c.id)+'" '+(c.id===v?'selected':'')+'>'+esc(c.nombre)+'</option>').join('')+'</select>':'<input name="'+name+'" type="'+type+'"'+attr+bounds+(type==='checkbox'?(v?' checked':''):' maxlength="'+max+'" value="'+esc(v)+'"')+'>')+'</label>';
+ }).join('')+'</div>'+(target==='productos'?'<label>Subir foto desde tu dispositivo<input type="file" name="foto" accept="image/jpeg,image/png,image/webp"></label><p class="muted">JPG, PNG o WebP · hasta 10 MB. Se optimiza antes de subir. La foto será pública. Se sube al guardar y reemplaza el enlace de imagen.</p><img id="photoPreview" class="upload-preview" hidden alt="Vista previa de la foto seleccionada">':'');
  openEditor((row?'Editar ':'Añadir ')+titles[target],html,async f=>{
  const payload={};for(const [name,,type] of fields[target])payload[name]=type==='checkbox'?f.has(name):type==='number'?Number(f.get(name)):String(f.get(name)||'').trim();
  for(const name of ['logo','portada','imagen'])if(payload[name]&&!payload[name].startsWith('https://'))throw Error('Usa una URL HTTPS para las imágenes.');
  if(payload.slug&&!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(payload.slug))throw Error('El identificador solo admite minúsculas, números y guiones.');
  if(payload.whatsapp&&!/^[1-9]\d{7,14}$/.test(payload.whatsapp))throw Error('WhatsApp debe tener entre 8 y 15 dígitos, incluyendo el código de país.');
  if(target==='miembros'&&!/^[0-9a-f-]{36}$/i.test(payload.usuario_id))throw Error('Introduce el UUID del usuario.');
+ if(target==='productos'){const file=f.get('foto');if(file?.size){$('#editStatus').textContent='Optimizando y subiendo foto…';payload.imagen=await uploadPhoto(db,restaurant.id,file);$('[name=imagen]').value=payload.imagen;$('[name=foto]').value='';$('#editStatus').textContent='Foto subida. Guardando producto…';}}
  const table=target==='datos'?'restaurantes':target;
  if(row){const changed=await result(db.from(table).update(payload).eq('id',row.id).select('id'));if(!changed.length)throw Error('No se guardó: acceso revocado o registro eliminado.');}
  else{if(!['restaurantes','datos'].includes(target))payload.restaurante_id=restaurant.id;await result(db.from(table).insert(payload));}
  await boot();status('Cambios guardados.');
  });
+ if(target==='productos'){let previewUrl;const clear=()=>{if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=null;};$('#editor').addEventListener('close',clear,{once:true});$('[name=foto]').onchange=e=>{clear();const img=$('#photoPreview'),file=e.target.files[0];img.hidden=true;if(!file)return;try{validatePhoto(file);previewUrl=URL.createObjectURL(file);img.src=previewUrl;img.hidden=false;$('#editStatus').textContent='Foto seleccionada. Pulsa Guardar para subirla.';}catch(err){e.target.value='';$('#editStatus').textContent=err.message;}};}
 }
 async function remove(row){
  if(!confirm('¿Eliminar '+(row.nombre||row.usuario_id||'mesa '+row.numero)+'? Esta acción no se puede deshacer.'))return;
