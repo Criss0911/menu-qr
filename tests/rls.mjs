@@ -10,17 +10,25 @@ await db.exec(await readFile(new URL('sql/01-schema.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/02-demo.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/04-apariencia.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/04-apariencia.sql',root),'utf8'));
+await db.exec(`create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id bigint generated always as identity,bucket_id text,name text);alter table storage.objects enable row level security;grant usage on schema storage to anon,authenticated;grant insert,select,update,delete on storage.objects to anon,authenticated;grant usage on sequence storage.objects_id_seq to anon,authenticated;`);
+await db.exec(await readFile(new URL('sql/05-fotos-destacados.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/05-fotos-destacados.sql',root),'utf8'));
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',b='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',s='cccccccc-cccc-4ccc-8ccc-cccccccccccc',rid='10000000-0000-4000-8000-000000000001',ridB='10000000-0000-4000-8000-000000000002',catB='20000000-0000-4000-8000-000000000099';
 await db.exec(`insert into auth.users values ('${a}'),('${b}'),('${s}'); insert into public.restaurantes(id,nombre,slug,activo) values('${ridB}','Privado','privado',false); insert into public.categorias(id,restaurante_id,nombre) values('${catB}','${ridB}','Secreta'); insert into public.miembros values('${rid}','${a}'),('${ridB}','${b}'); insert into private.superadmins values('${s}');`);
 async function role(name,uid=''){await db.exec("reset role;");await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role '+name);}
 let checks=0;
 async function blocked(sql){await assert.rejects(db.exec(sql));checks++;}
 await role('anon');
+await blocked(`insert into storage.objects(bucket_id,name) values('menu-productos','${rid}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp')`);
 assert.equal((await db.query('select * from public.restaurantes')).rows.length,1);checks++;
 assert.equal((await db.query('select * from public.productos')).rows.length,6);checks++;
 await blocked("insert into public.restaurantes(nombre,slug) values('Hack','hack')");
 await blocked('select * from public.miembros');
 await role('authenticated',a);
+await db.exec(`insert into storage.objects(bucket_id,name) values('menu-productos','${rid}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp')`);checks++;
+await blocked(`insert into storage.objects(bucket_id,name) values('menu-productos','${ridB}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp')`);
+await blocked(`insert into storage.objects(bucket_id,name) values('menu-productos','${rid}/malicioso.svg')`);
+await blocked(`update public.productos set destacado='viral' where restaurante_id='${rid}'`);
 await db.exec(`update public.restaurantes set plantilla='berries',modo_atencion='catalogo' where id='${rid}'`);checks++;
 assert.equal((await db.query(`update public.restaurantes set plantilla='berries' where id='${ridB}' returning *`)).rows.length,0);checks++;
 await blocked(`update public.restaurantes set color_principal='url(evil)' where id='${rid}'`);

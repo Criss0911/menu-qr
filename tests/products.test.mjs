@@ -1,0 +1,4 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {validatePhoto} from '../assets/upload.js';import {featuredProducts} from '../assets/product-view.js';
+test('fotos: solo formatos permitidos y límites de tamaño',()=>{for(const type of ['image/jpeg','image/png','image/webp'])assert.doesNotThrow(()=>validatePhoto({type,size:100}));for(const file of [{type:'image/svg+xml',size:2},{type:'text/html',size:5},{type:'image/png',size:0},{type:'image/jpeg',size:11*1024*1024}])assert.throws(()=>validatePhoto(file));});
+test('carrusel no muestra ocultos ni destaca automáticamente productos',()=>{assert.deepEqual(featuredProducts([{id:1,disponible:false,destacado:'novedad'},{id:2,disponible:true,destacado:''},{id:3,disponible:true,destacado:'tendencia'}]).map(p=>p.id),[3]);assert.equal(featuredProducts(Array.from({length:20},()=>({disponible:true,destacado:'novedad'}))).length,12);});
