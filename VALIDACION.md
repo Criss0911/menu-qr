@@ -59,3 +59,6 @@ Fondos ambientales: 12 pruebas automáticas correctas. Verificado en navegador l
 
 ## Animaciones GSAP
 Verificado en navegador local: GSAP/ScrollTrigger cargados (motion-enhanced), filtro Postres muestra dos resultados, pausa elimina la mejora animada y la ficha se abre con opacidad 1. Sin errores de consola en esa revisión. Se mantiene la accesibilidad nativa de los diálogos y fallback visible ante fallo de la biblioteca.
+
+Fondo de postres: vista de escritorio inspeccionada, 12 decoraciones con pausa comprobada; vista móvil de 390 px sin desbordamiento horizontal. Cambio exclusivamente visual, sin migraciones.
+

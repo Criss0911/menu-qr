@@ -148,3 +148,7 @@ Prueba manual local adicional: `/tests/catalog-manual.html` permite verificar lo
 El menú público incorpora GSAP y ScrollTrigger 3.13.0 mediante jsDelivr, con versión fijada. Referencia: https://gsap.com/docs/v3/Installation/ y https://gsap.com/docs/v3/Plugins/ScrollTrigger/ . Se cargan después del catálogo y solo si el movimiento está habilitado. Si el CDN falla, el contenido permanece visible y el menú conserva sus controles y efectos CSS básicos.
 
 Incluye entrada escalonada de la portada, aparición de tarjetas al entrar en pantalla (también al filtrar categorías), apertura de fichas, detalles decorativos flotantes, zoom sutil y respuestas visuales en botones. Pausar efectos cancela las animaciones de GSAP, detiene las decoraciones y conserva el contenido visible. También respeta los cambios en prefers-reduced-motion. No modifica Supabase ni datos de productos. El módulo assets/motion.js concentra el comportamiento.
+
+### Fondo de postres
+La plantilla Fresas y postres usa un fondo rosa y crema con ilustraciones vectoriales flotantes (fresas bañadas en crema, chocolate y confites). En móvil reduce la cantidad. Respeta Pausar efectos y reducir movimiento. Los dibujos están en assets/sweets.svg y son decorativos; no representan productos del catálogo.
+
