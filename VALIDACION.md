@@ -46,3 +46,6 @@ Las pruebas de navegador se ejecutaron con las herramientas del entorno de entre
 12 pruebas de lógica y 25 comprobaciones de PostgreSQL/RLS aprobadas. Se verifican formato y tamaño de fotos, selección de destacados, bloqueo de subida anónima y de carpetas ajenas, y rechazo de destacados inválidos. Las pruebas SQL simulan el esquema storage; no verifican el servidor de archivos real. Ficha y carrusel de la demo comprobados en navegador, sin botón de compra en catálogo.
 
 Optimización de una imagen PNG comprobada en navegador: conversión a WebP correcta. Diseño, ficha, carrusel y modo catálogo revisados localmente. Subida autenticada a Storage pendiente de prueba con sesión del administrador; la migración real se aplicó correctamente. No se alteraron fotos del catálogo real durante las pruebas.
+
+Fondos ambientales: 12 pruebas automáticas correctas. Verificado en navegador local: pausa, persistencia al recargar y apertura visible de detalles con efectos pausados. CSS respeta prefers-reduced-motion.
+
