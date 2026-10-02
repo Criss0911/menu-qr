@@ -122,7 +122,7 @@ Al seleccionar la foto o el nombre de un producto aparece una ficha con foto, de
 
 ## Diseño y movimiento
 
-Portada con degradado, botón de exploración, navegación de categorías fija al desplazarse, tarjetas con profundidad, zoom sutil de imagen, aparición de tarjetas y apertura animada de fichas. El movimiento de la portada termina tras dos ciclos. Se respeta prefers-reduced-motion. No se agregan vídeos automáticos, sonido ni librerías de animación.
+Portada con degradado, botón de exploración, navegación de categorías fija al desplazarse, tarjetas con profundidad, zoom sutil de imagen, aparición de tarjetas y apertura animada de fichas. El movimiento de la portada es continuo y puede pausarse desde el encabezado. Se respeta prefers-reduced-motion. No se agregan vídeos automáticos, sonido ni librerías de animación.
 
 ### Fondos animados
 El menú utiliza luces ambientales en los colores del negocio y formas suaves en la portada. El botón Pausar efectos recuerda la preferencia en este navegador. Respeta la opción del dispositivo de reducir movimiento. No requiere cambios en Supabase.
