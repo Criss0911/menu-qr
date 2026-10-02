@@ -26,3 +26,11 @@ body:has(#app) button:active{transform:scale(.97)}body:has(#app) .cartbar:active
 body.motion-paused *,body.motion-paused *:before,body.motion-paused *:after{transition:none!important;scroll-behavior:auto!important}body.motion-paused .hero-sparkles i{animation-play-state:paused}body.motion-paused .card:hover,body.motion-paused .featured-card:hover,body.motion-paused .hero-cta:hover,body.motion-paused .food img,body.motion-paused .food span,body.motion-paused .featured-photo img{transform:none!important}
 @media(max-width:760px){.hero-sparkles i:nth-child(2){right:80%}.hero-sparkles i:nth-child(3){right:10%;top:50%}.product-dialog .dialog-head{top:-20px}}
 @media(prefers-reduced-motion:reduce){.hero-sparkles i{animation:none!important}.featured-card:hover .featured-photo img,.hero-cta:hover span{transform:none!important}}
+/* Movimiento de portada visible durante la navegación. */
+body:has(#app) .hero-art{animation:heroFloatVisible 6s ease-in-out infinite;transform-origin:center center}
+body:has(#app) .hero-sparkles i{width:20px;height:20px;opacity:.48;animation-duration:5s}
+body:has(#app) .hero-sparkles i:nth-child(2){width:12px;height:12px}body:has(#app) .hero-sparkles i:nth-child(3){width:28px;height:28px;opacity:.85}body:has(#app) .hero-sparkles i:nth-child(4){width:10px;height:10px}
+body:has(#app) .ambient-background i:first-child,body:has(#app) .ambient-background i:nth-child(3){background:radial-gradient(circle,color-mix(in srgb,var(--orange) 23%,transparent),transparent 66%)}
+@keyframes heroFloatVisible{0%,100%{transform:translateY(0) rotate(-7deg)}50%{transform:translateY(-22px) rotate(2deg)}}
+@media(max-width:760px){body:has(#app) .hero-art{animation-duration:5s}.ambient-background i{opacity:.72}}
+@media(prefers-reduced-motion:reduce){body:has(#app) .hero-art,body:has(#app) .hero-sparkles i{animation:none!important}}
