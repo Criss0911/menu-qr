@@ -127,3 +127,18 @@ Portada con degradado, botón de exploración, navegación de categorías fija a
 ### Fondos animados
 El menú utiliza luces ambientales en los colores del negocio y formas suaves en la portada. El botón Pausar efectos recuerda la preferencia en este navegador. Respeta la opción del dispositivo de reducir movimiento. No requiere cambios en Supabase.
 
+
+## Catálogo diario, tamaños, galería y promociones (2 de octubre de 2026)
+
+La migración `sql/06-catalogo-diario.sql` ya se aplicó al proyecto menuQR. En instalaciones nuevas ejecútala después de 05. Las columnas mantienen las políticas RLS existentes; cada administrador solo escribe en sus negocios.
+
+- **Productos → Editar:** Visible en el menú controla si aparece. Estado del producto permite Disponible, Disponible en una fecha, Agotado y Solo por encargo. En el modo por fecha, solo se puede pedir durante el día indicado, usando America/La_Paz; fuera de esa fecha sigue visible con Fuera de fecha. Agotado y Solo por encargo no se añaden al carrito.
+- **Tamaños y extras:** una opción por línea con formato `Mediano | 24.50`. Hasta 12 de cada grupo. Tamaños muestra el precio total; extras, el importe adicional. Son informativos en esta etapa, no seleccionables en el carrito. El pedido usa el producto base y su precio.
+- **Galería:** imagen principal más hasta 5 fotos adicionales. Puedes pegar enlaces HTTPS o seleccionar varios JPG/PNG/WebP. Se optimizan y suben al guardar. Cada enlace subido se conserva en el formulario si falla una subida posterior, para reintentar sin duplicarlo. Quitar un enlace no elimina el archivo de Storage.
+- **Promociones:** nueva sección del panel. Hasta 5 anuncios con título, mensaje, inicio, fin y casilla de publicación. Fechas inclusivas en hora de Bolivia. Los anuncios no cambian precios ni aplican descuentos automáticamente. Los vencidos se ocultan en el menú, pero se conservan para editar en el panel.
+
+La página revisa el cambio de día cada minuto mientras está visible y al volver a la pestaña. Cambios de contenido hechos por el administrador aparecen al recargar. No es inventario en tiempo real. Las promociones futuras y vencidas pertenecen al catálogo público y pueden consultarse vía API; no guardes contenido confidencial allí.
+
+La demostración de postres incluye estados, opciones y dos ilustraciones explícitamente marcadas como ejemplos. No modifica productos ni ofertas reales. Sustituye las ilustraciones por tus fotos.
+
+Prueba manual local adicional: `/tests/catalog-manual.html` permite verificar los formularios sin escribir en Supabase; la subida real requiere el panel autenticado.

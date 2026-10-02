@@ -49,3 +49,10 @@ Optimización de una imagen PNG comprobada en navegador: conversión a WebP corr
 
 Fondos ambientales: 12 pruebas automáticas correctas. Verificado en navegador local: pausa, persistencia al recargar y apertura visible de detalles con efectos pausados. CSS respeta prefers-reduced-motion.
 
+
+## Ampliación de catálogo — 2 de octubre de 2026
+- 17 pruebas de JavaScript correctas, incluyendo cambio de fecha en Bolivia, agotados fuera del carrito, promociones activas/vencidas y validación de opciones/galería.
+- 33 comprobaciones PostgreSQL/RLS correctas en PGlite. Migración repetible, datos malformados rechazados, escrituras ajenas bloqueadas. Storage usa un esquema simulado en estas pruebas.
+- Migración 06 aplicada en Supabase real: Success. No rows returned.
+- Navegador local: ficha con tamaños/extras, cambio entre dos imágenes, estados, promoción vigente y serialización de formularios de producto/promociones verificados. Vista móvil en iframe de 390 px sin desbordamiento horizontal.
+- Pendiente: subida de fotos y guardado completo desde una sesión autenticada real del panel. No se ha modificado el catálogo real para hacer pruebas.
