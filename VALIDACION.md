@@ -40,3 +40,9 @@ Las pruebas de navegador se ejecutaron con las herramientas del entorno de entre
 - 20 comprobaciones PostgreSQL/RLS pasan; la migración se ejecuta dos veces, el propietario puede cambiar apariencia, otro restaurante no puede y colores/modos inválidos se rechazan.
 - Acceso real del Super Admin comprobado, seis productos y seis mesas visibles; QR de mesa 2 generado con URL publicada. Teléfono de WhatsApp configurado y guardado, sin envío de prueba.
 - Recuperación por correo y entrega efectiva en WhatsApp siguen sin verificarse.
+
+## Ampliación fotos y destacados
+
+12 pruebas de lógica y 25 comprobaciones de PostgreSQL/RLS aprobadas. Se verifican formato y tamaño de fotos, selección de destacados, bloqueo de subida anónima y de carpetas ajenas, y rechazo de destacados inválidos. Las pruebas SQL simulan el esquema storage; no verifican el servidor de archivos real. Ficha y carrusel de la demo comprobados en navegador, sin botón de compra en catálogo.
+
+Optimización de una imagen PNG comprobada en navegador: conversión a WebP correcta. Diseño, ficha, carrusel y modo catálogo revisados localmente. Subida autenticada a Storage pendiente de prueba con sesión del administrador; la migración real se aplicó correctamente. No se alteraron fotos del catálogo real durante las pruebas.

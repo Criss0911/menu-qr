@@ -23,7 +23,7 @@ La configuración entregada consulta Supabase también al abrir localmente. Para
 ## Conectar Supabase
 
 1. Crea un proyecto en [Supabase](https://supabase.com). Guarda su contraseña de base de datos fuera del repositorio.
-2. En SQL Editor ejecuta, en orden, `sql/01-schema.sql`, `sql/02-demo.sql` y `sql/04-apariencia.sql`. El esquema se ejecuta una sola vez sobre un proyecto nuevo; está envuelto en una transacción. No lo ejecutes sobre tablas de otro proyecto. La demo se puede repetir.
+2. En SQL Editor ejecuta, en orden, `sql/01-schema.sql`, `sql/02-demo.sql` y `sql/04-apariencia.sql` y `sql/05-fotos-destacados.sql`. El esquema se ejecuta una sola vez sobre un proyecto nuevo; está envuelto en una transacción. No lo ejecutes sobre tablas de otro proyecto. La demo se puede repetir.
 3. En Authentication → Users crea un usuario administrador con correo y contraseña. Para el primer acceso puedes usar la opción de crear usuario y confirmar su correo desde el panel.
 4. Copia el UUID del usuario y adapta las sentencias comentadas de `sql/03-bootstrap.example.sql`. Asigna Super Admin o solo Fast Burger. No pegues literalmente el marcador UUID.
 5. En Authentication → URL Configuration configura Site URL y las Redirect URLs con la dirección final de `admin.html`. Para pruebas añade `http://127.0.0.1:4173/admin.html`. Mantén HTTPS en producción. Desactiva el registro público si solo usarás cuentas creadas por el administrador.
@@ -49,7 +49,7 @@ El restablecimiento de contraseña usa el correo de Supabase. Configura SMTP y r
 - **Super Admin:** crear/editar/eliminar restaurantes y asignar/revocar accesos mediante UUID de usuarios ya creados en Supabase Auth. No crea cuentas Auth desde el navegador. Eliminar un restaurante con productos puede requerir eliminar primero los productos por las restricciones de integridad; el panel muestra el error y la operación es atómica.
 - Un usuario puede administrar varios restaurantes; selecciona el restaurante antes de editar.
 - La moneda de este MVP es BOB, presentada como Bs. No hay conversión monetaria.
-- Las imágenes son URLs HTTPS externas; el MVP no incluye subida a Storage. Usa imágenes propias o autorizadas.
+- Las fotos de productos se pueden subir desde el dispositivo o usar mediante URL HTTPS. Logo y portada usan enlaces HTTPS. Usa imágenes propias o autorizadas.
 
 ## Seguridad y límites del MVP
 
@@ -109,3 +109,17 @@ Solo catálogo permite buscar y filtrar productos, sin carrito ni pedidos. Los a
 `preview-postres.html` es una demostración independiente y explícita; sus productos y precios son ilustrativos. No crea un restaurante ni modifica Fast Burger. Sustituye el nombre, logo y productos al crear tu negocio real.
 
 Actualización de puesta en marcha: cuenta Super Admin activada, inicio de sesión real y QR comprobados; WhatsApp de Fast Burger guardado. No se ha enviado un pedido de prueba.
+
+## Fotos, ficha de producto y carrusel
+
+Ejecuta `sql/05-fotos-destacados.sql` después de las migraciones anteriores. Crea el bucket público `menu-productos` con límite de 2 MB por archivo y permisos de subida exclusivamente para administradores del restaurante indicado en la ruta. Las fotos del catálogo son públicas por URL incluso si luego se oculta el producto: no subas documentos ni imágenes privadas. Referencia: https://supabase.com/docs/guides/storage/security/access-control
+
+En Productos → Editar o Añadir selecciona **Subir foto desde tu dispositivo**, revisa la vista previa y pulsa Guardar. Acepta JPG, PNG o WebP de hasta 10 MB; reduce a un máximo de 1600 píxeles y convierte a WebP antes de subir. Un enlace HTTPS externo sigue siendo válido. Si falla el guardado después de subir, el formulario conserva la URL para volver a intentar. Las fotos antiguas no se borran automáticamente para no romper otros productos que compartan su URL; el propietario puede revisar archivos sin uso desde Storage. El consumo de almacenamiento depende del plan de Supabase.
+
+El selector Carrusel permite No destacar, Novedad o En tendencia. Son selecciones editoriales del administrador, no estadísticas de ventas. Se muestran hasta 12 productos disponibles de categorías activas, en el orden del catálogo. Si ninguno está destacado, la sección se oculta. Se puede desplazar con flechas, teclado o deslizando; no avanza automáticamente.
+
+Al seleccionar la foto o el nombre de un producto aparece una ficha con foto, descripción completa y precio. Se cierra con la X, Escape o tocando fuera. Solo incluye Añadir a mi pedido si el negocio permite pedidos; Solo catálogo sigue siendo de consulta.
+
+## Diseño y movimiento
+
+Portada con degradado, botón de exploración, navegación de categorías fija al desplazarse, tarjetas con profundidad, zoom sutil de imagen, aparición de tarjetas y apertura animada de fichas. El movimiento de la portada termina tras dos ciclos. Se respeta prefers-reduced-motion. No se agregan vídeos automáticos, sonido ni librerías de animación.
