@@ -1,0 +1,26 @@
+import {esc} from './core.js';
+import {todayLaPaz,parseOptions,optionsText,parseGallery,validatePromotions} from './catalog.js';
+import {validatePhoto,uploadPhoto} from './upload.js';
+export function catalogFields(p={}){return `<fieldset class="catalog-fields"><legend>Disponibilidad y opciones</legend><label>Estado del producto<select name="estado_venta">${[['disponible','Disponible'],['hoy','Disponible en una fecha'],['agotado','Agotado'],['encargo','Solo por encargo']].map(([v,t])=>`<option value="${v}" ${(p.estado_venta||'disponible')===v?'selected':''}>${t}</option>`).join('')}</select></label><label>Fecha de disponibilidad (hora de Bolivia)<input type="date" name="fecha_disponible" value="${esc(p.fecha_disponible||todayLaPaz())}"></label><p class="muted">La fecha se utiliza solo con “Disponible en una fecha”. Fuera de ese día, se muestra Fuera de fecha. Agotados y encargos se ven, pero no se añaden al pedido.</p><label>Tamaños · precio total de cada tamaño<textarea name="tamanos" placeholder="Pequeño | 18&#10;Mediano | 24">${esc(optionsText(p.tamanos))}</textarea></label><label>Extras · importe adicional<textarea name="extras" placeholder="Chocolate | 3&#10;Galleta | 2">${esc(optionsText(p.extras))}</textarea></label><p class="muted">Una opción por línea: Nombre | precio. Máximo 12. Por ahora son informativos: el carrito usa el producto base y su precio.</p></fieldset><fieldset class="catalog-fields"><legend>Galería de fotos</legend><label>Fotos adicionales (una URL HTTPS por línea)<textarea name="galeria">${esc((p.galeria||[]).join('\n'))}</textarea></label><label>O subir fotos adicionales<input name="fotosGaleria" type="file" accept="image/jpeg,image/png,image/webp" multiple></label><p class="muted">Hasta 5 adicionales, además de la principal. Se optimizan y suben al guardar. Para retirar una foto, borra su enlace; el archivo permanece en Storage.</p><p id="gallerySelection" role="status"></p></fieldset>`;}
+export function wireCatalogFields(form){let pending=[];
+ const date=form.elements.fecha_disponible,state=form.elements.estado_venta;
+ const sync=()=>{date.required=state.value==='hoy';date.disabled=state.value!=='hoy';};state.onchange=sync;sync();
+ form.elements.fotosGaleria.onchange=e=>{try{const files=[...e.target.files];if(parseGallery(form.elements.galeria.value).length+files.length>5)throw Error('La galería admite hasta 5 fotos adicionales.');files.forEach(validatePhoto);pending=files;form.querySelector('#gallerySelection').textContent=files.map(f=>f.name).join(' · ');}catch(err){pending=[];e.target.value='';form.querySelector('#gallerySelection').textContent=err.message;}};
+ return async(db,rid)=>{const tamanos=parseOptions(form.elements.tamanos.value),extras=parseOptions(form.elements.extras.value);let galeria=parseGallery(form.elements.galeria.value);
+ if(galeria.length+pending.length>5)throw Error('La galería admite hasta 5 fotos adicionales.');
+ while(pending.length){form.querySelector('#gallerySelection').textContent='Subiendo '+pending[0].name+'…';const url=await uploadPhoto(db,rid,pending[0]);galeria.push(url);pending.shift();form.elements.galeria.value=galeria.join('\n');}
+ form.elements.fotosGaleria.value='';form.querySelector('#gallerySelection').textContent='Fotos listas para guardar.';
+ return {estado_venta:state.value,fecha_disponible:state.value==='hoy'?date.value:null,tamanos,extras,galeria};};
+}
+export function promotionsEditor(r,openEditor,save){
+ let items=structuredClone(r.promociones||[]);
+ const draw=()=>{
+ const html='<p class="muted">Hasta 5 anuncios. Fechas inclusivas, hora de Bolivia. Son mensajes informativos: no cambian automáticamente los precios.</p><div id="promotionRows">'+items.map((p,i)=>`<fieldset class="catalog-fields"><legend>Promoción ${i+1}</legend><label>Título<input name="title${i}" value="${esc(p.titulo)}" maxlength="80" required></label><label>Mensaje<textarea name="text${i}" maxlength="300">${esc(p.texto)}</textarea></label><div class="form-grid"><label>Desde<input name="start${i}" type="date" value="${esc(p.inicio)}" required></label><label>Hasta<input name="end${i}" type="date" value="${esc(p.fin)}" required></label></div><label><input name="active${i}" type="checkbox" ${p.activo?'checked':''}>Publicar en estas fechas</label><button type="button" data-remove-promo="${i}">Quitar promoción</button></fieldset>`).join('')+'</div><button type="button" id="addPromotion" '+(items.length>=5?'disabled':'')+'>+ Añadir promoción</button>';
+ openEditor('Promociones programadas',html,async f=>{collect(f);await save({promociones:validatePromotions(items)});});
+ const form=document.querySelector('#editForm');
+ form.querySelector('#addPromotion').onclick=()=>{collect(new FormData(form));items.push({titulo:'',texto:'',inicio:todayLaPaz(),fin:todayLaPaz(),activo:true});draw();};
+ form.querySelectorAll('[data-remove-promo]').forEach(b=>b.onclick=()=>{collect(new FormData(form));items.splice(Number(b.dataset.removePromo),1);draw();});
+ };
+ function collect(f){items=items.map((p,i)=>({titulo:String(f.get('title'+i)||'').trim(),texto:String(f.get('text'+i)||'').trim(),inicio:String(f.get('start'+i)||''),fin:String(f.get('end'+i)||''),activo:f.has('active'+i)}));}
+ draw();
+}
