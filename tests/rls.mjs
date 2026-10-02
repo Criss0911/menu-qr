@@ -13,6 +13,8 @@ await db.exec(await readFile(new URL('sql/04-apariencia.sql',root),'utf8'));
 await db.exec(`create schema storage;create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);create table storage.objects(id bigint generated always as identity,bucket_id text,name text);alter table storage.objects enable row level security;grant usage on schema storage to anon,authenticated;grant insert,select,update,delete on storage.objects to anon,authenticated;grant usage on sequence storage.objects_id_seq to anon,authenticated;`);
 await db.exec(await readFile(new URL('sql/05-fotos-destacados.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/05-fotos-destacados.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/06-catalogo-diario.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/06-catalogo-diario.sql',root),'utf8'));
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',b='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',s='cccccccc-cccc-4ccc-8ccc-cccccccccccc',rid='10000000-0000-4000-8000-000000000001',ridB='10000000-0000-4000-8000-000000000002',catB='20000000-0000-4000-8000-000000000099';
 await db.exec(`insert into auth.users values ('${a}'),('${b}'),('${s}'); insert into public.restaurantes(id,nombre,slug,activo) values('${ridB}','Privado','privado',false); insert into public.categorias(id,restaurante_id,nombre) values('${catB}','${ridB}','Secreta'); insert into public.miembros values('${rid}','${a}'),('${ridB}','${b}'); insert into private.superadmins values('${s}');`);
 async function role(name,uid=''){await db.exec("reset role;");await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role '+name);}
@@ -34,6 +36,14 @@ assert.equal((await db.query(`update public.restaurantes set plantilla='berries'
 await blocked(`update public.restaurantes set color_principal='url(evil)' where id='${rid}'`);
 await blocked(`update public.restaurantes set modo_atencion='delivery' where id='${rid}'`);
 assert.equal((await db.query('select * from public.miembros')).rows.length,1);checks++;
+await db.exec(`update public.productos set estado_venta='agotado',tamanos='[{"nombre":"Grande","precio":30}]',galeria='["https://example.com/foto.jpg"]' where restaurante_id='${rid}'`);checks++;
+await blocked(`update public.productos set estado_venta='hoy',fecha_disponible=null where restaurante_id='${rid}'`);
+await blocked(`update public.productos set extras='[{"nombre":"Extra","precio":-1}]' where restaurante_id='${rid}'`);
+await blocked(`update public.productos set galeria='["javascript:alert(1)"]' where restaurante_id='${rid}'`);
+await blocked(`update public.restaurantes set promociones='[{"titulo":"Oferta","texto":"","activo":true,"inicio":"2026-02-30","fin":"2026-03-01"}]' where id='${rid}'`);
+await db.exec(`update public.restaurantes set promociones='[{"titulo":"Oferta","texto":"Consulta","activo":true,"inicio":"2026-10-01","fin":"2026-10-03"}]' where id='${rid}'`);checks++;
+assert.equal((await db.query(`update public.restaurantes set promociones='[]' where id='${ridB}' returning id`)).rows.length,0);checks++;
+assert.equal((await db.query(`update public.productos set estado_venta='agotado' where restaurante_id='${ridB}' returning id`)).rows.length,0);checks++;
 await db.exec(`update public.productos set precio=29 where restaurante_id='${rid}'`);checks++;
 await blocked(`insert into public.categorias(restaurante_id,nombre) values('${ridB}','Hack')`);
 await blocked(`insert into public.productos(restaurante_id,categoria_id,nombre,precio) values('${rid}','${catB}','Hack',1)`);
