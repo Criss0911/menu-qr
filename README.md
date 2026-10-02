@@ -142,3 +142,9 @@ La página revisa el cambio de día cada minuto mientras está visible y al volv
 La demostración de postres incluye estados, opciones y dos ilustraciones explícitamente marcadas como ejemplos. No modifica productos ni ofertas reales. Sustituye las ilustraciones por tus fotos.
 
 Prueba manual local adicional: `/tests/catalog-manual.html` permite verificar los formularios sin escribir en Supabase; la subida real requiere el panel autenticado.
+
+## Animaciones coordinadas — 2 de octubre de 2026
+
+El menú público incorpora GSAP y ScrollTrigger 3.13.0 mediante jsDelivr, con versión fijada. Referencia: https://gsap.com/docs/v3/Installation/ y https://gsap.com/docs/v3/Plugins/ScrollTrigger/ . Se cargan después del catálogo y solo si el movimiento está habilitado. Si el CDN falla, el contenido permanece visible y el menú conserva sus controles y efectos CSS básicos.
+
+Incluye entrada escalonada de la portada, aparición de tarjetas al entrar en pantalla (también al filtrar categorías), apertura de fichas, detalles decorativos flotantes, zoom sutil y respuestas visuales en botones. Pausar efectos cancela las animaciones de GSAP, detiene las decoraciones y conserva el contenido visible. También respeta los cambios en prefers-reduced-motion. No modifica Supabase ni datos de productos. El módulo assets/motion.js concentra el comportamiento.

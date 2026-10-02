@@ -56,3 +56,6 @@ Fondos ambientales: 12 pruebas automáticas correctas. Verificado en navegador l
 - Migración 06 aplicada en Supabase real: Success. No rows returned.
 - Navegador local: ficha con tamaños/extras, cambio entre dos imágenes, estados, promoción vigente y serialización de formularios de producto/promociones verificados. Vista móvil en iframe de 390 px sin desbordamiento horizontal.
 - Pendiente: subida de fotos y guardado completo desde una sesión autenticada real del panel. No se ha modificado el catálogo real para hacer pruebas.
+
+## Animaciones GSAP
+Verificado en navegador local: GSAP/ScrollTrigger cargados (motion-enhanced), filtro Postres muestra dos resultados, pausa elimina la mejora animada y la ficha se abre con opacidad 1. Sin errores de consola en esa revisión. Se mantiene la accesibilidad nativa de los diálogos y fallback visible ante fallo de la biblioteca.
