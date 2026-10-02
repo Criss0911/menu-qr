@@ -1,6 +1,6 @@
 import {uploadPhoto,validatePhoto} from './upload.js';
-import {appearanceEditor} from './appearance-editor.js?v=products-2';
-import {client,result,demo} from './api.js?v=products-2';
+import {appearanceEditor} from './appearance-editor.js?v=experience-3';
+import {client,result,demo} from './api.js?v=experience-3';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
 const titles={productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',apariencia:'Apariencia',restaurantes:'Restaurantes',miembros:'Accesos'};
