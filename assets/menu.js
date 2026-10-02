@@ -12,6 +12,13 @@ try{
  cart=Object.fromEntries(lines(cart,data.products).map(p=>[p.id,p.quantity]));
  const r=data.restaurant;document.title=r.nombre+' · Menú QR';
  const ambient=document.createElement('div');ambient.className='ambient-background';ambient.setAttribute('aria-hidden','true');ambient.innerHTML='<i></i><i></i><i></i>';document.body.prepend(ambient);
+ if(theme.template==='berries'){
+ const sweets=[['strawberry',2,12,76,-15],['candy',89,9,42,12],['chocolate',94,35,66,18],['candy',5,42,36,-15],['strawberry',86,66,82,18],['chocolate',1,78,62,-22],['candy',44,87,34,12],['strawberry',43,4,52,-16],['candy',76,43,32,22],['strawberry',17,61,56,-18],['candy',65,74,40,12],['chocolate',58,27,42,18]];
+ ambient.classList.add('dessert-background');
+ const colors=['#ef5781','#f4b82f','#62bade','#8b63c7','#65ae67'];
+ ambient.insertAdjacentHTML('beforeend',sweets.map(([kind,x,y,size,tilt],i)=>`<div class="dessert-float" style="--x:${x}%;--y:${y}%;--size:${size}px;--tilt:${tilt}deg;--duration:${12+i%5*2}s;--delay:-${i*1.7}s;color:${colors[i%colors.length]}"><svg viewBox="0 0 100 110" aria-hidden="true" focusable="false"><use href="assets/sweets.svg#${kind}"></use></svg></div>`).join(''));
+ }
+
  const motion=document.createElement('button');motion.className='motion-toggle';motion.type='button';motion.setAttribute('aria-label','Pausar efectos animados');
  let paused=false;try{paused=localStorage.getItem('menuqr:motion')==='paused';}catch{}
  function syncMotion(){document.body.classList.toggle('motion-paused',paused);motion.textContent=paused?'▶ Activar efectos':'Ⅱ Pausar efectos';motion.setAttribute('aria-label',paused?'Activar efectos animados':'Pausar efectos animados');motion.setAttribute('aria-pressed',String(paused));document.dispatchEvent(new Event('menuqr:motion'));}
