@@ -15,6 +15,8 @@ await db.exec(await readFile(new URL('sql/05-fotos-destacados.sql',root),'utf8')
 await db.exec(await readFile(new URL('sql/05-fotos-destacados.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/06-catalogo-diario.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/06-catalogo-diario.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/07-interaccion.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/07-interaccion.sql',root),'utf8'));
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',b='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',s='cccccccc-cccc-4ccc-8ccc-cccccccccccc',rid='10000000-0000-4000-8000-000000000001',ridB='10000000-0000-4000-8000-000000000002',catB='20000000-0000-4000-8000-000000000099';
 await db.exec(`insert into auth.users values ('${a}'),('${b}'),('${s}'); insert into public.restaurantes(id,nombre,slug,activo) values('${ridB}','Privado','privado',false); insert into public.categorias(id,restaurante_id,nombre) values('${catB}','${ridB}','Secreta'); insert into public.miembros values('${rid}','${a}'),('${ridB}','${b}'); insert into private.superadmins values('${s}');`);
 async function role(name,uid=''){await db.exec("reset role;");await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role '+name);}
@@ -31,6 +33,9 @@ await db.exec(`insert into storage.objects(bucket_id,name) values('menu-producto
 await blocked(`insert into storage.objects(bucket_id,name) values('menu-productos','${ridB}/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa.webp')`);
 await blocked(`insert into storage.objects(bucket_id,name) values('menu-productos','${rid}/malicioso.svg')`);
 await blocked(`update public.productos set destacado='viral' where restaurante_id='${rid}'`);
+await blocked(`update public.restaurantes set movimiento='otro' where id='${rid}'`);
+await blocked(`update public.restaurantes set estilo_tarjetas='otro' where id='${rid}'`);
+assert.equal((await db.query(`update public.restaurantes set movimiento='suave' where id='${ridB}' returning id`)).rows.length,0);checks++;
 await db.exec(`update public.restaurantes set plantilla='berries',modo_atencion='catalogo' where id='${rid}'`);checks++;
 assert.equal((await db.query(`update public.restaurantes set plantilla='berries' where id='${ridB}' returning *`)).rows.length,0);checks++;
 await blocked(`update public.restaurantes set color_principal='url(evil)' where id='${rid}'`);
