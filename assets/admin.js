@@ -1,6 +1,6 @@
-import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=catalog-5';
+import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=interactive-9';
 import {uploadPhoto,validatePhoto} from './upload.js';
-import {appearanceEditor} from './appearance-editor.js?v=experience-3';
+import {appearanceEditor} from './appearance-editor.js?v=interactive-9';
 import {client,result,demo} from './api.js?v=catalog-5';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
@@ -70,7 +70,7 @@ function edit(row){
  const max=name==='descripcion'?500:name==='nombre'?100:name==='slug'?80:name==='direccion'?300:2048;
  return '<label>'+esc(label)+(type==='textarea'?'<textarea name="'+name+'" maxlength="'+max+'">'+esc(v)+'</textarea>':type==='featured'?'<select name="destacado">'+[['','No destacar'],['novedad','Novedad'],['tendencia','En tendencia']].map(([key,title])=>'<option value="'+key+'" '+(v===key?'selected':'')+'>'+title+'</option>').join('')+'</select>':type==='select'?'<select name="'+name+'" required>'+categories.map(c=>'<option value="'+esc(c.id)+'" '+(c.id===v?'selected':'')+'>'+esc(c.nombre)+'</option>').join('')+'</select>':'<input name="'+name+'" type="'+type+'"'+attr+bounds+(type==='checkbox'?(v?' checked':''):' maxlength="'+max+'" value="'+esc(v)+'"')+'>')+'</label>';
  }).join('')+'</div>'+(target==='productos'?'<label>Subir foto desde tu dispositivo<input type="file" name="foto" accept="image/jpeg,image/png,image/webp"></label><p class="muted">JPG, PNG o WebP · hasta 10 MB. Se optimiza antes de subir. La foto será pública. Se sube al guardar y reemplaza el enlace de imagen.</p><img id="photoPreview" class="upload-preview" hidden alt="Vista previa de la foto seleccionada">':'');
- openEditor((row?'Editar ':'Añadir ')+titles[target],html+(target==='productos'?catalogFields(row||{}):''),async f=>{
+ openEditor((row?'Editar ':'Añadir ')+titles[target],html+(target==='productos'?catalogFields(row||{},rows):''),async f=>{
  const payload={};for(const [name,,type] of fields[target])payload[name]=type==='checkbox'?f.has(name):type==='number'?Number(f.get(name)):String(f.get(name)||'').trim();
  for(const name of ['logo','portada','imagen'])if(payload[name]&&!payload[name].startsWith('https://'))throw Error('Usa una URL HTTPS para las imágenes.');
  if(payload.slug&&!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(payload.slug))throw Error('El identificador solo admite minúsculas, números y guiones.');

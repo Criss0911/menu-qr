@@ -6,10 +6,10 @@ export const templates = {
 export function appearance(r={}) {
  const template=Object.hasOwn(templates,r.plantilla)?r.plantilla:'classic',base=templates[template];
  const color=(v,f)=>/^#[0-9a-f]{6}$/i.test(v||'')?v:f;
- return {...base,template,accent:color(r.color_principal,base.accent),background:color(r.color_fondo,base.background),title:r.titulo_catalogo||base.title,notice:r.aviso_catalogo||'',catalog:r.modo_atencion==='catalogo'};
+ return {...base,template,motion:['suave','vivo','ninguno'].includes(r.movimiento)?r.movimiento:'vivo',cardStyle:['redondeado','compacto','editorial'].includes(r.estilo_tarjetas)?r.estilo_tarjetas:'redondeado',accent:color(r.color_principal,base.accent),background:color(r.color_fondo,base.background),title:r.titulo_catalogo||base.title,notice:r.aviso_catalogo||'',catalog:r.modo_atencion==='catalogo'};
 }
 export function applyAppearance(r,root=document.documentElement){
- const a=appearance(r);root.dataset.template=a.template;
+ const a=appearance(r);root.dataset.template=a.template;root.dataset.motion=a.motion;root.dataset.cards=a.cardStyle;
  root.style.setProperty('--orange',a.accent);root.style.setProperty('--cream',a.background);root.style.setProperty('--hero',a.hero);
  return a;
 }

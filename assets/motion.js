@@ -1,7 +1,7 @@
 // Progressive enhancement: the menu remains visible if the animation CDN fails.
 const reduce=matchMedia('(prefers-reduced-motion: reduce)');
 let gsap,ScrollTrigger,loading,context,triggers=[],cards=[],started=false;
-const allowed=()=>!reduce.matches&&!document.body.classList.contains('motion-paused');
+const allowed=()=>!reduce.matches&&document.documentElement.dataset.motion!=='ninguno'&&!document.body.classList.contains('motion-paused');
 function script(src){return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.async=true;const timer=setTimeout(()=>reject(Error('Animation timeout')),8000);s.onload=()=>{clearTimeout(timer);resolve();};s.onerror=()=>{clearTimeout(timer);reject(Error('Animation unavailable'));};document.head.append(s);});}
 function clearCards(){triggers.forEach(t=>t.kill());triggers=[];if(gsap&&cards.length){gsap.killTweensOf(cards);gsap.set(cards,{clearProps:'opacity,transform'});}cards=[];}
 function revealCards(){clearCards();if(!started||!allowed())return;cards=[...document.querySelectorAll('#products .card')];
