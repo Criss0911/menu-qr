@@ -62,3 +62,11 @@ Verificado en navegador local: GSAP/ScrollTrigger cargados (motion-enhanced), fi
 
 Fondo de postres: vista de escritorio inspeccionada, 12 decoraciones con pausa comprobada; vista móvil de 390 px sin desbordamiento horizontal. Cambio exclusivamente visual, sin migraciones.
 
+
+## Experiencia interactiva
+- 20 pruebas de lógica correctas: simulador con centavos, entradas repetidas/inválidas, favoritos por negocio con datos corruptos/almacenamiento bloqueado, relacionados limitados al catálogo.
+- 36 comprobaciones SQL/RLS correctas en PGlite. Migración 07 repetida sin errores, estilos inválidos y escrituras de otro negocio rechazados.
+- Migración 07 aplicada en Supabase: Success. No rows returned.
+- Navegador local: total mediano + chocolate = Bs 27; combinación copiada; favorito conservado al recargar; filtro muestra un producto guardado; enlace p=f1 abre su ficha; galería avanza a 2/2; ampliación y zoom funcionan; Sorpréndeme abre un producto; formulario de apariencia produce campos movimiento/estilo correctos.
+- Ficha móvil comprobada en iframe de 390 px: panel inferior sin desbordamiento horizontal. Portada revisada con la fotografía existente de Moroch@.
+- No se ha enviado nada mediante el selector nativo de compartir. El guardado autenticado de las nuevas preferencias/relacionados y nuevas subidas reales sigue pendiente; formularios y RLS se comprobaron por separado.

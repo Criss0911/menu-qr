@@ -152,3 +152,18 @@ Incluye entrada escalonada de la portada, aparición de tarjetas al entrar en pa
 ### Fondo de postres
 La plantilla Fresas y postres usa un fondo rosa y crema con ilustraciones vectoriales flotantes (fresas bañadas en crema, chocolate y confites). En móvil reduce la cantidad. Respeta Pausar efectos y reducir movimiento. Los dibujos están en assets/sweets.svg y son decorativos; no representan productos del catálogo.
 
+
+## Experiencia interactiva — 2 de octubre de 2026
+
+La migración `sql/07-interaccion.sql` ya está aplicada en menuQR. Para otra instalación, ejecútala después de 06. Hereda el aislamiento RLS existente.
+
+- **Arma tu antojo:** las opciones de tamaño y extras ahora se pueden seleccionar dentro de la ficha. El total se calcula en centavos. Es un simulador y permite copiar la combinación; no crea pedidos ni añade variantes al carrito. Solo aparece cuando el administrador ha configurado tamaños o extras. En el modo WhatsApp, el botón separado añade únicamente el producto base.
+- **Favoritos:** corazón en las tarjetas y ficha, filtro Mis favoritos, persistencia local por ID del negocio. No requiere cuenta; no sincroniza entre dispositivos. Si el navegador impide almacenar datos, funciona durante la visita.
+- **Galería:** desplazamiento horizontal con el dedo, flechas e indicador; toca una foto para ampliarla. Acercar / alejar permite examinarla y desplazar la imagen ampliada.
+- **Compartir:** abre el diálogo nativo del dispositivo cuando está disponible. Alternativa: copia del enlace o campo seleccionable. El enlace incluye `p=ID_PRODUCTO` y abre directamente su ficha. No transmite mensajes automáticamente ni incluye el número de mesa.
+- **Relacionados:** Productos → Editar permite seleccionar hasta cuatro. Si no eliges ninguno, muestra otros disponibles de la misma categoría. Nunca muestra productos fuera del catálogo del negocio. Con un solo producto, la sección no aparece.
+- **Sorpréndeme:** elige un producto disponible al azar del negocio. No selecciona agotados, encargos ni fuera de fecha.
+- **Diseño:** ficha inferior en móvil, tarjetas con foto/nombre/precio, categorías con miniaturas, contador de resultados y botón Volver arriba. La portada usa la imagen de portada configurada o, si falta, una foto existente del catálogo. El encabezado muestra el nombre del negocio.
+- **Apariencia:** movimiento Suave, Llamativo o Sin animaciones; tarjetas Redondeadas, Compactas o Foto protagonista. El control del visitante para pausar y la preferencia de reducir movimiento prevalecen. El color de fondo elegido se combina con el ambiente de postres.
+
+Los productos y precios reales no se han alterado. La demo de postres contiene opciones ilustrativas para probar el simulador. Las descripciones siguen disponibles en la ficha aunque ya no ocupan espacio en cada tarjeta.
