@@ -167,3 +167,7 @@ La migración `sql/07-interaccion.sql` ya está aplicada en menuQR. Para otra in
 - **Apariencia:** movimiento Suave, Llamativo o Sin animaciones; tarjetas Redondeadas, Compactas o Foto protagonista. El control del visitante para pausar y la preferencia de reducir movimiento prevalecen. El color de fondo elegido se combina con el ambiente de postres.
 
 Los productos y precios reales no se han alterado. La demo de postres contiene opciones ilustrativas para probar el simulador. Las descripciones siguen disponibles en la ficha aunque ya no ocupan espacio en cada tarjeta.
+
+## Ventas y crecimiento
+Consulta GUIA-VENTAS.md para activar consultas, horarios, combos, campañas, resultados y fidelidad. Ejecuta sql/08-crecimiento.sql al actualizar un proyecto existente. Los campos comerciales vacíos permanecen ocultos.
+

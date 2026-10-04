@@ -70,3 +70,9 @@ Fondo de postres: vista de escritorio inspeccionada, 12 decoraciones con pausa c
 - Navegador local: total mediano + chocolate = Bs 27; combinación copiada; favorito conservado al recargar; filtro muestra un producto guardado; enlace p=f1 abre su ficha; galería avanza a 2/2; ampliación y zoom funcionan; Sorpréndeme abre un producto; formulario de apariencia produce campos movimiento/estilo correctos.
 - Ficha móvil comprobada en iframe de 390 px: panel inferior sin desbordamiento horizontal. Portada revisada con la fotografía existente de Moroch@.
 - No se ha enviado nada mediante el selector nativo de compartir. El guardado autenticado de las nuevas preferencias/relacionados y nuevas subidas reales sigue pendiente; formularios y RLS se comprobaron por separado.
+
+## Ventas y crecimiento — 3 de octubre de 2026
+- 24 pruebas JavaScript correctas; 57 comprobaciones SQL/RLS en PGlite, incluyendo referencias duplicadas, canjes repetidos, lecturas y escrituras entre negocios, estadísticas y deduplicación de eventos.
+- Formulario comercial probado con guardado simulado. Consulta de combinación verificada en navegador: Mediano + Chocolate = Bs 27, incluido en el enlace de WhatsApp. No se enviaron mensajes.
+- Configuración real conservada: datos comerciales vacíos y medición desactivada por defecto. Guardado con sesión real del administrador pendiente.
+
