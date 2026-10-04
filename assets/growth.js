@@ -1,11 +1,12 @@
-import {client} from './api.js?v=catalog-5';
+import {sessionId} from './navigation.js?v=stable-11';
+import {client} from './api.js?v=stable-11';
 import {esc} from './core.js';
-import {cleanGrowth,inquiryUrl,sourceOf} from './growth-core.js';
+import {cleanGrowth,inquiryUrl,sourceOf} from './growth-core.js?v=stable-11';
 import {quoteProduct} from './interactions.js';
 export function mountGrowth(data,openDetails){
  const r=data.restaurant,g=cleanGrowth(r.crecimiento),source=sourceOf(new URLSearchParams(location.search).get('src'));let session,detailController;
- try{session=sessionStorage.getItem('menuqr:visit:'+r.id);if(!session){session=crypto.randomUUID();sessionStorage.setItem('menuqr:visit:'+r.id,session);}}catch{session=crypto.randomUUID();}
- const seen=new Set();async function track(event,product=null){const key=event+':'+product;if(seen.has(key)||!g.medicion||document.body.dataset.preview||navigator.globalPrivacyControl)return;seen.add(key);try{const db=await client();await db.rpc('registrar_evento_menu',{rid:r.id,sesion:session,tipo:event,producto:product,fuente:source});}catch{/* El menú funciona aunque la medición no esté disponible. */}}
+ try{session=sessionStorage.getItem('menuqr:visit:'+r.id);if(!session){session=sessionId();sessionStorage.setItem('menuqr:visit:'+r.id,session);}}catch{session=sessionId();}
+ const seen=new Set();async function track(event,product=null){const key=event+':'+product;if(!session||seen.has(key)||!g.medicion||document.body.dataset.preview||navigator.globalPrivacyControl)return;seen.add(key);try{const db=await client();await db.rpc('registrar_evento_menu',{rid:r.id,sesion:session,tipo:event,producto:product,fuente:source});}catch{/* El menú funciona aunque la medición no esté disponible. */}}
  void track('visita');
  const section=document.createElement('section');section.className='growth-info';section.setAttribute('aria-label','Visítanos y vuelve por más');
  const link=(url,label)=>url?'<a class="growth-link" target="_blank" rel="noopener" href="'+esc(url)+'">'+label+' ↗</a>':'';

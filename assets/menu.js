@@ -1,14 +1,19 @@
-import {mountGrowth} from './growth.js?v=growth-10';
+import {menuHome,searchText,imageFallbacks} from './navigation.js?v=stable-11';
+imageFallbacks();
+import {mountGrowth} from './growth.js?v=stable-11';
 import {favoriteStore} from './interactions.js';
 import {availability,activePromotions,todayLaPaz} from './catalog.js';
-import {mountProductViews} from './product-view.js?v=growth-10';
-import {appearance,applyAppearance} from './appearance.js?v=growth-10';
-import {demo,loadMenu,loadDessertDemo} from './api.js?v=catalog-5';
-import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js?v=catalog-5';
-const $=s=>document.querySelector(s);let data,mesa,cart={},active='all',query='',theme,openDetails,favorites,onlyFavorites=false;const params=new URLSearchParams(location.search),slug=params.get('r')||'fastburger';const key='menuqr:'+slug;
+import {mountProductViews} from './product-view.js?v=stable-11';
+import {appearance,applyAppearance} from './appearance.js?v=stable-11';
+import {demo,loadMenu,loadDessertDemo,loadDirectory,loadDemoMenu} from './api.js?v=stable-11';
+import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js?v=stable-11';
+const $=s=>document.querySelector(s);let data,mesa,cart={},active='all',query='',theme,openDetails,favorites,onlyFavorites=false;const params=new URLSearchParams(location.search),slug=params.get('r')||'';const key='menuqr:'+slug;
 function notify(t){$('#toast').textContent=t;setTimeout(()=>$('#toast').textContent='',2400);}
+if(!slug&&!document.body.dataset.preview){
+ try{const restaurants=await loadDirectory();$('#app').innerHTML='<section class=panel><h1>Elige tu menú</h1><p>Selecciona el negocio que quieres visitar.</p><div class=directory>'+restaurants.map(r=>'<a class=directory-link href="?r='+encodeURIComponent(r.slug)+'"><strong>'+esc(r.nombre)+'</strong><span>'+esc(r.descripcion)+'</span></a>').join('')+'</div>'+(restaurants.length?'':'<p>No hay menús publicados por el momento.</p>')+'</section>';}catch(e){showError(e);}
+}else{
 try{
- data=document.body.dataset.preview==='postres'?await loadDessertDemo():await loadMenu(slug);theme=applyAppearance(data.restaurant);mesa=theme.catalog?null:tableNumber(params.get('m'));
+ data=document.body.dataset.preview==='postres'?await loadDessertDemo():document.body.dataset.preview==='burgers'?await loadDemoMenu('fastburger'):await loadMenu(slug);theme=applyAppearance(data.restaurant);mesa=theme.catalog?null:tableNumber(params.get('m'));
  if(mesa&&!data.tables.some(t=>t.numero===mesa))throw Error('Esta mesa no está disponible. Pide un QR válido al personal.');
  try{const saved=JSON.parse(localStorage.getItem(key)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))cart=saved;}catch{}
  cart=Object.fromEntries(lines(cart,data.products).map(p=>[p.id,p.quantity]));
@@ -33,8 +38,8 @@ try{
  const cover=safeImage(r.portada)||safeImage(data.products.find(p=>safeImage(p.imagen))?.imagen);if(cover){$('.hero-art').innerHTML='<img alt="" src="'+esc(cover)+'" fetchpriority="high">';$('.hero').classList.add('photo-hero');}
  if(safeImage(r.logo))$('.brand').innerHTML='<img class="logo" alt="" src="'+esc(safeImage(r.logo))+'">'+esc(r.nombre);
  if(!safeImage(r.logo))$('.brand').innerHTML='<span aria-hidden="true">'+esc(theme.emoji)+'</span>'+esc(r.nombre);
- $('.brand').href='?r='+encodeURIComponent(slug);
- $('#searchProducts').oninput=e=>{query=e.target.value.toLocaleLowerCase('es');renderProducts();};
+ $('.brand').href=menuHome(location.href).href;document.querySelector('.top a[href="admin.html"]').href='admin.html'+(slug?'?r='+encodeURIComponent(slug):'');
+ $('#searchProducts').oninput=e=>{query=searchText(e.target.value);renderProducts();};
  $('#categories').innerHTML=[{id:'all',nombre:'Todo el menú'},...data.categories].map(c=>'<button data-category="'+esc(c.id)+'">'+(safeImage(data.products.find(p=>p.categoria_id===c.id)?.imagen)?'<img alt="" src="'+esc(safeImage(data.products.find(p=>p.categoria_id===c.id)?.imagen))+'">':'<span aria-hidden="true">'+(c.id==='all'?'✦':theme.emoji)+'</span>')+esc(c.nombre)+'</button>').join('');
  $('#categories').onclick=e=>{const b=e.target.closest('[data-category]');if(b){active=b.dataset.category;renderProducts();}};
  openDetails=mountProductViews(data,theme,id=>{if(theme.catalog||!availability(data.products.find(p=>p.id===id)||{}).orderable)return;cart[id]=Math.min(99,(cart[id]||0)+1);save();notify('Añadido a tu pedido');},favorites);
@@ -45,12 +50,15 @@ try{
  $('#surprise').onclick=()=>{const choices=data.products.filter(p=>p.disponible&&availability(p).orderable);if(!choices.length){notify('No hay productos disponibles para sugerir ahora.');return;}openDetails(choices[Math.floor(Math.random()*choices.length)].id);};
  const back=document.createElement('button');back.className='back-to-top';back.type='button';back.textContent='↑';back.setAttribute('aria-label','Volver arriba');back.hidden=true;document.body.append(back);const updateBack=()=>{back.hidden=scrollY<500;};window.addEventListener('scroll',updateBack,{passive:true});back.onclick=()=>window.scrollTo({top:0,behavior:document.body.classList.contains('motion-paused')||matchMedia('(prefers-reduced-motion: reduce)').matches||theme.motion==='ninguno'?'instant':'smooth'});
  mountGrowth(data,openDetails);
- const requested=params.get('p');if(requested){if(data.products.some(p=>p.id===requested))openDetails(requested);else notify('Este producto ya no está disponible.');}
+ const requested=params.get('p');if(requested){if(data.products.some(p=>p.id===requested))openDetails(requested);else{history.replaceState(null,'',menuHome(location.href));notify('Este producto ya no está disponible. Puedes elegir otro del menú.');}}
  const sparkles=document.createElement('div');sparkles.className='hero-sparkles';sparkles.setAttribute('aria-hidden','true');sparkles.innerHTML='<i></i><i></i><i></i><i></i>';$('.hero').append(sparkles);
- void import('./motion.js?v=growth-10').catch(()=>{});
-}catch(e){$('#app').innerHTML='<section class="empty"><h1>No podemos mostrar el menú</h1><p>'+esc(e.message)+'</p><a href="./?r=fastburger">Volver al inicio</a></section>';}
+ void import('./motion.js?v=stable-11').catch(()=>{});
+}catch(e){showError(e);}
+}
+function showError(e){const withoutTable=menuHome(location.href);withoutTable.searchParams.delete('m');$('#app').innerHTML='<section class="empty"><h1>No podemos mostrar el menú</h1><p>'+esc(e.message)+'</p><button id="retryMenu">Volver a intentar</button> <a href="'+esc(withoutTable.href)+'">Abrir menú sin mesa</a> <a href="./">Elegir otro menú</a></section>';$('#retryMenu').onclick=()=>location.reload();}
+
 function renderProducts(){
- const products=data.products.filter(p=>(!onlyFavorites||favorites.has(p.id))&&(active==='all'||p.categoria_id===active)&&(p.nombre+' '+p.descripcion).toLocaleLowerCase('es').includes(query)&&data.categories.some(c=>c.id===p.categoria_id));
+ const products=data.products.filter(p=>(!onlyFavorites||favorites.has(p.id))&&(active==='all'||p.categoria_id===active)&&searchText(p.nombre+' '+(p.descripcion||'')).includes(query)&&data.categories.some(c=>c.id===p.categoria_id));
  $('#products').innerHTML=products.length?products.map(p=>`<article class="card"><button type="button" class="favorite-heart" data-favorite-id="${esc(p.id)}" aria-label="${favorites.has(p.id)?'Quitar de favoritos':'Guardar favorito'}: ${esc(p.nombre)}" aria-pressed="${favorites.has(p.id)}">${favorites.has(p.id)?'♥':'♡'}</button><button class="product-open" data-detail="${esc(p.id)}" aria-label="Ver detalles de ${esc(p.nombre)}"><div class="food">${safeImage(p.imagen)?'<img loading="lazy" alt="'+esc(p.nombre)+'" src="'+esc(safeImage(p.imagen))+'">':'<span aria-hidden="true">'+esc(p.emoji||theme.emoji)+'</span>'}</div><span class="detail-hint">Ver detalles ↗</span></button><div class="card-body"><span class="availability ${availability(p).tone}">${esc(availability(p).label)}</span><h3><button class="product-title" data-detail="${esc(p.id)}">${esc(p.nombre)}</button></h3><p>${esc(p.descripcion)}</p><div class="card-bottom"><strong>${money(cents(p.precio))}</strong>${theme.catalog?'<span class="catalog-badge">En catálogo</span>':!availability(p).orderable?'<span class="catalog-badge">Consulta al local</span>':`<button data-add="${esc(p.id)}" aria-label="Añadir ${esc(p.nombre)}">+ Añadir</button>`}</div></div></article>`).join(''):'<p class="empty">No hay coincidencias. Prueba otra categoría, cambia la búsqueda o desactiva Mis favoritos.</p>';
  if($('#productCount'))$('#productCount').textContent=products.length+' '+(products.length===1?'antojo':'antojos');
  document.querySelectorAll('[data-category]').forEach(b=>{b.classList.toggle('selected',b.dataset.category===active);b.setAttribute('aria-pressed',b.dataset.category===active);});
@@ -63,14 +71,14 @@ $('#cartItems').onclick=e=>{const b=e.target.closest('[data-delta]');if(b){cart[
 $('#checkout').onclick=async()=>{
  const b=$('#checkout');b.disabled=true;
  try{
-  if(demo){$('#cartStatus').textContent='Demo: configura el WhatsApp del restaurante en el panel para enviar pedidos.';return;}
+  if(demo||document.body.dataset.preview){$('#cartStatus').textContent='Demo: configura el WhatsApp del restaurante en el panel para enviar pedidos.';return;}
   const fresh=await loadMenu(slug),items=lines(cart,fresh.products);
-  if(appearance(fresh.restaurant).catalog){$('#openCart').hidden=true;throw Error('Este negocio ahora funciona como catálogo. No admite pedidos por este menú.');}
+  if(appearance(fresh.restaurant).catalog){$('#openCart').hidden=true;$('#cartDialog').close();location.reload();throw Error('Este negocio ahora funciona como catálogo. No admite pedidos por este menú.');}
   if(mesa&&!fresh.tables.some(t=>t.numero===mesa))throw Error('La mesa ya no está disponible.');
   const old=lines(cart,data.products);
   const changed=JSON.stringify(items.map(p=>[p.id,p.precio,p.quantity]))!==JSON.stringify(old.map(p=>[p.id,p.precio,p.quantity]));
-  data=fresh;
-  if(changed){cart=Object.fromEntries(items.map(p=>[p.id,p.quantity]));save();renderCart();throw Error('El menú cambió. Revisa los productos y el total antes de continuar.');}
+  Object.assign(data,fresh);
+  if(changed){cart=Object.fromEntries(items.map(p=>[p.id,p.quantity]));save();renderCart();renderProducts();throw Error('El menú cambió. Revisa los productos y el total antes de continuar.');}
   if(!items.length)throw Error('Tu pedido está vacío.');
   if(!/^[1-9]\d{7,14}$/.test(data.restaurant.whatsapp||''))throw Error('El restaurante todavía no configuró su WhatsApp.');
   location.href='https://wa.me/'+data.restaurant.whatsapp+'?text='+encodeURIComponent(orderText(data.restaurant,mesa,items,$('#notes').value));
