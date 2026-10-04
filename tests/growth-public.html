@@ -1,0 +1,5 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../assets/style.css"><body data-preview="postres"><main><h1>Prueba local de consulta · no enviar mensajes</h1><a class="hero-cta">Catálogo</a><div id="featured"></div><div id="products"></div></main><script type="module">
+import {loadDessertDemo} from '../assets/api.js';import {mountProductViews} from '../assets/product-view.js';import {mountGrowth} from '../assets/growth.js';
+const data=await loadDessertDemo();data.restaurant.whatsapp='59173821536';data.restaurant.crecimiento={horarios:'Horario de ejemplo',recogida:'Recogida de ejemplo',entrega:'Entrega de ejemplo',fidelidad:'Beneficio de ejemplo',meta:5,medicion:false};
+const open=mountProductViews(data,{catalog:true,emoji:'🍓'},()=>{},null);mountGrowth(data,open);open('f1');
+</script></body></html>

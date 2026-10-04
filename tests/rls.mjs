@@ -17,6 +17,8 @@ await db.exec(await readFile(new URL('sql/06-catalogo-diario.sql',root),'utf8'))
 await db.exec(await readFile(new URL('sql/06-catalogo-diario.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/07-interaccion.sql',root),'utf8'));
 await db.exec(await readFile(new URL('sql/07-interaccion.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/08-crecimiento.sql',root),'utf8'));
+await db.exec(await readFile(new URL('sql/08-crecimiento.sql',root),'utf8'));
 const a='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',b='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',s='cccccccc-cccc-4ccc-8ccc-cccccccccccc',rid='10000000-0000-4000-8000-000000000001',ridB='10000000-0000-4000-8000-000000000002',catB='20000000-0000-4000-8000-000000000099';
 await db.exec(`insert into auth.users values ('${a}'),('${b}'),('${s}'); insert into public.restaurantes(id,nombre,slug,activo) values('${ridB}','Privado','privado',false); insert into public.categorias(id,restaurante_id,nombre) values('${catB}','${ridB}','Secreta'); insert into public.miembros values('${rid}','${a}'),('${ridB}','${b}'); insert into private.superadmins values('${s}');`);
 async function role(name,uid=''){await db.exec("reset role;");await db.query("select set_config('request.jwt.claim.sub',$1,false)",[uid]);await db.exec('set role '+name);}
@@ -56,6 +58,37 @@ await blocked(`update public.productos set restaurante_id='${ridB}' where restau
 await blocked(`insert into public.miembros values('${ridB}','${a}')`);
 await blocked(`insert into private.superadmins values('${a}')`);
 assert.equal((await db.query(`update public.restaurantes set nombre='Hack' where id='${ridB}' returning *`)).rows.length,0);checks++;
+
+await role('anon');
+await blocked(`select * from public.ventas_menu`);
+await blocked(`select * from private.eventos_menu`);
+await blocked(`select public.resultados_menu('${rid}')`);
+await blocked(`select public.canjear_menu('${rid}','TEST-1234')`);
+await role('authenticated',a);
+await blocked(`select public.resultados_menu('${ridB}')`);
+await blocked(`select public.sellos_menu('${ridB}','TEST-1234')`);
+await blocked(`insert into public.ventas_menu(restaurante_id,referencia,importe) values('${ridB}','BAD',10)`);
+await blocked(`insert into public.ventas_menu(restaurante_id,referencia,importe,creado) values('${rid}','BAD-DATE',10,now())`);
+await db.exec(`update public.restaurantes set crecimiento='{"medicion":true,"fidelidad":"Beneficio de prueba","meta":2}' where id='${rid}'`);
+await db.exec(`insert into public.ventas_menu(restaurante_id,referencia,importe,cliente_codigo) values('${rid}','T1',20,'TEST-1234'),('${rid}','T2',30,'TEST-1234')`);checks++;
+await blocked(`insert into public.ventas_menu(restaurante_id,referencia,importe) values('${rid}','T1',20)`);
+assert.equal((await db.query(`select public.sellos_menu('${rid}','TEST-1234') as n`)).rows[0].n,2);checks++;
+await db.exec(`select public.canjear_menu('${rid}','TEST-1234')`);checks++;
+await blocked(`select public.canjear_menu('${rid}','TEST-1234')`);
+assert.equal((await db.query(`select public.sellos_menu('${rid}','TEST-1234') as n`)).rows[0].n,0);checks++;
+await role('authenticated',b);
+assert.equal((await db.query('select * from public.ventas_menu')).rows.length,0);checks++;
+assert.equal((await db.query('select * from public.canjes_menu')).rows.length,0);checks++;
+await blocked(`select public.canjear_menu('${rid}','TEST-1234')`);
+await role('anon');
+await db.exec(`select public.registrar_evento_menu('${rid}','${a}','visita',null,'instagram');select public.registrar_evento_menu('${rid}','${a}','visita',null,'instagram');select public.registrar_evento_menu('${ridB}','${a}','visita',null,'instagram')`);
+await role('authenticated',a);
+const growth=(await db.query(`select public.resultados_menu('${rid}') as s`)).rows[0].s;
+assert.equal(growth.eventos.visita,1);checks++;
+assert.equal(growth.ventas.cantidad,2);checks++;
+assert.equal(growth.ventas.importe,50);checks++;
+assert.equal(growth.ventas.promedio,25);checks++;
+
 await db.exec(`update public.categorias set activo=false where restaurante_id='${rid}'`);
 await role('anon');assert.equal((await db.query('select * from public.productos')).rows.length,0);checks++;
 await role('authenticated',b);assert.equal((await db.query(`select * from public.restaurantes where id='${ridB}'`)).rows.length,1);checks++;
