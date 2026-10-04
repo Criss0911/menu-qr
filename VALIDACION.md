@@ -76,3 +76,7 @@ Fondo de postres: vista de escritorio inspeccionada, 12 decoraciones con pausa c
 - Formulario comercial probado con guardado simulado. Consulta de combinación verificada en navegador: Mediano + Chocolate = Bs 27, incluido en el enlace de WhatsApp. No se enviaron mensajes.
 - Configuración real conservada: datos comerciales vacíos y medición desactivada por defecto. Guardado con sesión real del administrador pendiente.
 
+
+## Revisión de navegación — 4 de octubre de 2026
+Versión stable-11: 30 pruebas correctas y recorridos de navegador documentados en REVISION-NAVEGACION.md. Sin cambios de esquema ni de datos reales.
+
