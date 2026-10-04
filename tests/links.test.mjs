@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFile,readdir,access} from 'node:fs/promises';
+const root=new URL('../',import.meta.url);
+test('recursos locales de las páginas principales y módulos existen',async()=>{for(const name of ['index.html','admin.html','preview-postres.html']){const html=await readFile(new URL(name,root),'utf8');for(const match of html.matchAll(/(?:src|href)="(assets\/[^"?#]+)/g))await access(new URL(match[1],root));}for(const file of await readdir(new URL('assets/',root))){if(!file.endsWith('.js'))continue;const uri=new URL('assets/'+file,root),js=await readFile(uri,'utf8');for(const m of js.matchAll(/(?:from\s*|import\()'([.][.\/][^'?#]+)/g))await access(new URL(m[1],uri));}assert.ok(true);});
