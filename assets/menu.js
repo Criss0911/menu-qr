@@ -1,7 +1,8 @@
+import {mountGrowth} from './growth.js?v=growth-10';
 import {favoriteStore} from './interactions.js';
 import {availability,activePromotions,todayLaPaz} from './catalog.js';
-import {mountProductViews} from './product-view.js?v=interactive-9';
-import {appearance,applyAppearance} from './appearance.js?v=interactive-9';
+import {mountProductViews} from './product-view.js?v=growth-10';
+import {appearance,applyAppearance} from './appearance.js?v=growth-10';
 import {demo,loadMenu,loadDessertDemo} from './api.js?v=catalog-5';
 import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js?v=catalog-5';
 const $=s=>document.querySelector(s);let data,mesa,cart={},active='all',query='',theme,openDetails,favorites,onlyFavorites=false;const params=new URLSearchParams(location.search),slug=params.get('r')||'fastburger';const key='menuqr:'+slug;
@@ -43,9 +44,10 @@ try{
  document.addEventListener('menuqr:favorites',renderProducts);
  $('#surprise').onclick=()=>{const choices=data.products.filter(p=>p.disponible&&availability(p).orderable);if(!choices.length){notify('No hay productos disponibles para sugerir ahora.');return;}openDetails(choices[Math.floor(Math.random()*choices.length)].id);};
  const back=document.createElement('button');back.className='back-to-top';back.type='button';back.textContent='↑';back.setAttribute('aria-label','Volver arriba');back.hidden=true;document.body.append(back);const updateBack=()=>{back.hidden=scrollY<500;};window.addEventListener('scroll',updateBack,{passive:true});back.onclick=()=>window.scrollTo({top:0,behavior:document.body.classList.contains('motion-paused')||matchMedia('(prefers-reduced-motion: reduce)').matches||theme.motion==='ninguno'?'instant':'smooth'});
+ mountGrowth(data,openDetails);
  const requested=params.get('p');if(requested){if(data.products.some(p=>p.id===requested))openDetails(requested);else notify('Este producto ya no está disponible.');}
  const sparkles=document.createElement('div');sparkles.className='hero-sparkles';sparkles.setAttribute('aria-hidden','true');sparkles.innerHTML='<i></i><i></i><i></i><i></i>';$('.hero').append(sparkles);
- void import('./motion.js?v=interactive-9').catch(()=>{});
+ void import('./motion.js?v=growth-10').catch(()=>{});
 }catch(e){$('#app').innerHTML='<section class="empty"><h1>No podemos mostrar el menú</h1><p>'+esc(e.message)+'</p><a href="./?r=fastburger">Volver al inicio</a></section>';}
 function renderProducts(){
  const products=data.products.filter(p=>(!onlyFavorites||favorites.has(p.id))&&(active==='all'||p.categoria_id===active)&&(p.nombre+' '+p.descripcion).toLocaleLowerCase('es').includes(query)&&data.categories.some(c=>c.id===p.categoria_id));

@@ -1,10 +1,11 @@
-import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=interactive-9';
+import {renderGrowth} from './growth-admin.js?v=growth-10';
+import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=growth-10';
 import {uploadPhoto,validatePhoto} from './upload.js';
-import {appearanceEditor} from './appearance-editor.js?v=interactive-9';
+import {appearanceEditor} from './appearance-editor.js?v=growth-10';
 import {client,result,demo} from './api.js?v=catalog-5';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
-const titles={productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',apariencia:'Apariencia',promociones:'Promociones',restaurantes:'Restaurantes',miembros:'Accesos'};
+const titles={crecimiento:'Ventas y crecimiento',resultados:'Resultados',fidelidad:'Fidelidad',productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',apariencia:'Apariencia',promociones:'Promociones',restaurantes:'Restaurantes',miembros:'Accesos'};
 const fields={
  productos:[['nombre','Nombre','text',true],['descripcion','Descripción','textarea'],['categoria_id','Categoría','select',true],['precio','Precio (Bs)','number',true],['imagen','Imagen (URL HTTPS)','url'],['destacado','Carrusel','featured'],['orden','Orden','number'],['disponible','Visible en el menú','checkbox']],
  categorias:[['nombre','Nombre','text',true],['orden','Orden','number'],['activo','Activa','checkbox']],
@@ -28,7 +29,7 @@ async function boot(){
  $('#login').hidden=true;$('#dashboard').hidden=false;$('#logout').hidden=false;
  $('#restaurantSelect').innerHTML=restaurants.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.nombre)+'</option>').join('');
  r=restaurants.find(x=>x.id===r?.id)||restaurants[0];if(r)$('#restaurantSelect').value=r.id;
- $('#sections').innerHTML=['productos','categorias','mesas','datos','apariencia','promociones',...(superadmin?['restaurantes','miembros']:[])].map(s=>'<button data-section="'+s+'">'+titles[s]+'</button>').join('');
+ $('#sections').innerHTML=['productos','categorias','mesas','datos','apariencia','promociones','crecimiento','resultados','fidelidad',...(superadmin?['restaurantes','miembros']:[])].map(s=>'<button data-section="'+s+'">'+titles[s]+'</button>').join('');
  if(!r&&!superadmin){status('Tu cuenta no tiene un restaurante asignado. Contacta al administrador.');$('#content').textContent='Sin acceso asignado.';return;}
  if(!r)section='restaurantes';status('');await render();
 }
@@ -39,6 +40,7 @@ async function render(){
  document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('primary',b.dataset.section===section));
  if(!r&&section!=='restaurantes'){$('#content').textContent='Crea un restaurante para continuar.';return;}
  categories=r?await result(db.from('categorias').select('*').eq('restaurante_id',r.id).order('orden')):[];
+ if(['crecimiento','resultados','fidelidad'].includes(section)){await renderGrowth(section,{db,r,host:$('#content'),openEditor,reload:()=>boot(),status,showQr});return;}
  if(section==='promociones'){
  $('#content').innerHTML='<h2>Promociones programadas</h2><p>Anuncios con fecha de inicio y fin para '+esc(r.nombre)+'.</p><button id="editPromotions" class="primary">Gestionar promociones</button>';
  $('#editPromotions').onclick=()=>{const restaurant=r;promotionsEditor(restaurant,openEditor,async payload=>{const changed=await result(db.from('restaurantes').update(payload).eq('id',restaurant.id).select('id'));if(!changed.length)throw Error('No se guardó: acceso revocado.');await boot();status('Promociones guardadas.');});};return;
@@ -90,10 +92,10 @@ async function remove(row){
  let q=db.from(section).delete();q=section==='miembros'?q.eq('restaurante_id',r.id).eq('usuario_id',row.usuario_id):q.eq('id',row.id);
  const changed=await result(q.select());if(!changed.length)throw Error('No se eliminó: acceso revocado o registro inexistente.');await boot();status('Registro eliminado.');
 }
-async function showQr(numero){
- const url=new URL('index.html',location.href);url.search='';url.searchParams.set('r',r.slug);if(numero)url.searchParams.set('m',numero);
+async function showQr(numero,source){
+ const url=new URL('index.html',location.href);url.search='';url.searchParams.set('r',r.slug);if(numero)url.searchParams.set('m',numero);if(source)url.searchParams.set('src',source);
  $('#qrUrl').value=url.href;$('#qr').textContent='Generando QR…';$('#qrStatus').textContent='';qrSvg='';$('#downloadQr').disabled=true;$('#printQr').disabled=true;$('#qrDialog').showModal();
- try{const mod=await import('https://esm.sh/qrcode-generator@1.4.4');const qr=mod.default(0,'M');qr.addData(url.href);qr.make();qrSvg=qr.createSvgTag({cellSize:6,margin:24,scalable:true});$('#qr').innerHTML='<h2>'+esc(r.nombre)+'</h2><p>'+ (numero?'Mesa '+numero:'Menú general')+'</p>'+qrSvg;$('#downloadQr').disabled=false;$('#printQr').disabled=false;}catch{$('#qr').textContent='No se pudo generar el QR. Comprueba tu conexión y vuelve a intentarlo.';}
+ try{const mod=await import('https://esm.sh/qrcode-generator@1.4.4');const qr=mod.default(0,'M');qr.addData(url.href);qr.make();qrSvg=qr.createSvgTag({cellSize:6,margin:24,scalable:true});$('#qr').innerHTML='<h2>'+esc(r.nombre)+'</h2><p>'+ (numero?'Mesa '+numero:source?'Descubre tu próximo antojo · '+esc(source):'Menú general')+'</p>'+qrSvg;$('#downloadQr').disabled=false;$('#printQr').disabled=false;}catch{$('#qr').textContent='No se pudo generar el QR. Comprueba tu conexión y vuelve a intentarlo.';}
 }
 $('#downloadQr').onclick=()=>{const url=URL.createObjectURL(new Blob([qrSvg],{type:'image/svg+xml'}));const a=document.createElement('a');a.href=url;a.download='menu-qr.svg';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
 $('#printQr').onclick=()=>window.print();$('#closeQr').onclick=()=>$('#qrDialog').close();$('#closeEditor').onclick=()=>$('#editor').close();
