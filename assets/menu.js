@@ -1,12 +1,12 @@
-import {menuHome,searchText,imageFallbacks} from './navigation.js?v=stable-11';
+import {menuHome,searchText,imageFallbacks} from './navigation.js?v=play-12';
 imageFallbacks();
-import {mountGrowth} from './growth.js?v=stable-11';
+import {mountGrowth} from './growth.js?v=play-12';
 import {favoriteStore} from './interactions.js';
 import {availability,activePromotions,todayLaPaz} from './catalog.js';
-import {mountProductViews} from './product-view.js?v=stable-11';
-import {appearance,applyAppearance} from './appearance.js?v=stable-11';
-import {demo,loadMenu,loadDessertDemo,loadDirectory,loadDemoMenu} from './api.js?v=stable-11';
-import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js?v=stable-11';
+import {mountProductViews} from './product-view.js?v=play-12';
+import {appearance,applyAppearance} from './appearance.js?v=play-12';
+import {demo,loadMenu,loadDessertDemo,loadDirectory,loadDemoMenu} from './api.js?v=play-12';
+import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js?v=play-12';
 const $=s=>document.querySelector(s);let data,mesa,cart={},active='all',query='',theme,openDetails,favorites,onlyFavorites=false;const params=new URLSearchParams(location.search),slug=params.get('r')||'';const key='menuqr:'+slug;
 function notify(t){$('#toast').textContent=t;setTimeout(()=>$('#toast').textContent='',2400);}
 if(!slug&&!document.body.dataset.preview){
@@ -50,9 +50,10 @@ try{
  $('#surprise').onclick=()=>{const choices=data.products.filter(p=>p.disponible&&availability(p).orderable);if(!choices.length){notify('No hay productos disponibles para sugerir ahora.');return;}openDetails(choices[Math.floor(Math.random()*choices.length)].id);};
  const back=document.createElement('button');back.className='back-to-top';back.type='button';back.textContent='↑';back.setAttribute('aria-label','Volver arriba');back.hidden=true;document.body.append(back);const updateBack=()=>{back.hidden=scrollY<500;};window.addEventListener('scroll',updateBack,{passive:true});back.onclick=()=>window.scrollTo({top:0,behavior:document.body.classList.contains('motion-paused')||matchMedia('(prefers-reduced-motion: reduce)').matches||theme.motion==='ninguno'?'instant':'smooth'});
  mountGrowth(data,openDetails);
+ void import('./game.js?v=play-12').then(({mountGame})=>mountGame(data.restaurant,theme)).catch(()=>{});
  const requested=params.get('p');if(requested){if(data.products.some(p=>p.id===requested))openDetails(requested);else{history.replaceState(null,'',menuHome(location.href));notify('Este producto ya no está disponible. Puedes elegir otro del menú.');}}
  const sparkles=document.createElement('div');sparkles.className='hero-sparkles';sparkles.setAttribute('aria-hidden','true');sparkles.innerHTML='<i></i><i></i><i></i><i></i>';$('.hero').append(sparkles);
- void import('./motion.js?v=stable-11').catch(()=>{});
+ void import('./motion.js?v=play-12').catch(()=>{});
 }catch(e){showError(e);}
 }
 function showError(e){const withoutTable=menuHome(location.href);withoutTable.searchParams.delete('m');$('#app').innerHTML='<section class="empty"><h1>No podemos mostrar el menú</h1><p>'+esc(e.message)+'</p><button id="retryMenu">Volver a intentar</button> <a href="'+esc(withoutTable.href)+'">Abrir menú sin mesa</a> <a href="./">Elegir otro menú</a></section>';$('#retryMenu').onclick=()=>location.reload();}

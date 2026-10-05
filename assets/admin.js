@@ -1,8 +1,8 @@
-import {renderGrowth} from './growth-admin.js?v=stable-11';
-import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=stable-11';
+import {renderGrowth} from './growth-admin.js?v=play-12';
+import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=play-12';
 import {uploadPhoto,validatePhoto} from './upload.js';
-import {appearanceEditor} from './appearance-editor.js?v=stable-11';
-import {client,result,demo} from './api.js?v=stable-11';
+import {appearanceEditor} from './appearance-editor.js?v=play-12';
+import {client,result,demo} from './api.js?v=play-12';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
 const titles={crecimiento:'Ventas y crecimiento',resultados:'Resultados',fidelidad:'Fidelidad',productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',apariencia:'Apariencia',promociones:'Promociones',restaurantes:'Restaurantes',miembros:'Accesos'};

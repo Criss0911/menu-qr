@@ -1,7 +1,7 @@
-import {sessionId} from './navigation.js?v=stable-11';
-import {client} from './api.js?v=stable-11';
+import {sessionId} from './navigation.js?v=play-12';
+import {client} from './api.js?v=play-12';
 import {esc} from './core.js';
-import {cleanGrowth,inquiryUrl,sourceOf} from './growth-core.js?v=stable-11';
+import {cleanGrowth,inquiryUrl,sourceOf} from './growth-core.js?v=play-12';
 import {quoteProduct} from './interactions.js';
 export function mountGrowth(data,openDetails){
  const r=data.restaurant,g=cleanGrowth(r.crecimiento),source=sourceOf(new URLSearchParams(location.search).get('src'));let session,detailController;
