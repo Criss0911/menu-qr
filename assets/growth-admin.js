@@ -1,6 +1,6 @@
 import {esc,money,cents} from './core.js';
-import {result} from './api.js?v=play-12';
-import {cleanGrowth,httpsLink,sources,loyaltyBalance} from './growth-core.js?v=play-12';
+import {result} from './api.js?v=boutique-13';
+import {cleanGrowth,httpsLink,sources,loyaltyBalance} from './growth-core.js?v=boutique-13';
 export async function renderGrowth(section,{db,r,host,openEditor,reload,status,showQr}){
  const g=cleanGrowth(r.crecimiento);
  const run=fn=>async()=>{try{status('');await fn();}catch(e){status(e.message);}};

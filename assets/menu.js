@@ -1,12 +1,13 @@
-import {menuHome,searchText,imageFallbacks} from './navigation.js?v=play-12';
+import {mountBoutique,categoryArt} from './boutique.js?v=boutique-13';
+import {menuHome,searchText,imageFallbacks} from './navigation.js?v=boutique-13';
 imageFallbacks();
-import {mountGrowth} from './growth.js?v=play-12';
+import {mountGrowth} from './growth.js?v=boutique-13';
 import {favoriteStore} from './interactions.js';
 import {availability,activePromotions,todayLaPaz} from './catalog.js';
-import {mountProductViews} from './product-view.js?v=play-12';
-import {appearance,applyAppearance} from './appearance.js?v=play-12';
-import {demo,loadMenu,loadDessertDemo,loadDirectory,loadDemoMenu} from './api.js?v=play-12';
-import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js?v=play-12';
+import {mountProductViews} from './product-view.js?v=boutique-13';
+import {appearance,applyAppearance} from './appearance.js?v=boutique-13';
+import {demo,loadMenu,loadDessertDemo,loadDirectory,loadDemoMenu} from './api.js?v=boutique-13';
+import {esc,money,cents,tableNumber,lines,orderText,safeImage} from './core.js?v=boutique-13';
 const $=s=>document.querySelector(s);let data,mesa,cart={},active='all',query='',theme,openDetails,favorites,onlyFavorites=false;const params=new URLSearchParams(location.search),slug=params.get('r')||'';const key='menuqr:'+slug;
 function notify(t){$('#toast').textContent=t;setTimeout(()=>$('#toast').textContent='',2400);}
 if(!slug&&!document.body.dataset.preview){
@@ -40,7 +41,7 @@ try{
  if(!safeImage(r.logo))$('.brand').innerHTML='<span aria-hidden="true">'+esc(theme.emoji)+'</span>'+esc(r.nombre);
  $('.brand').href=menuHome(location.href).href;document.querySelector('.top a[href="admin.html"]').href='admin.html'+(slug?'?r='+encodeURIComponent(slug):'');
  $('#searchProducts').oninput=e=>{query=searchText(e.target.value);renderProducts();};
- $('#categories').innerHTML=[{id:'all',nombre:'Todo el menú'},...data.categories].map(c=>'<button data-category="'+esc(c.id)+'">'+(safeImage(data.products.find(p=>p.categoria_id===c.id)?.imagen)?'<img alt="" src="'+esc(safeImage(data.products.find(p=>p.categoria_id===c.id)?.imagen))+'">':'<span aria-hidden="true">'+(c.id==='all'?'✦':theme.emoji)+'</span>')+esc(c.nombre)+'</button>').join('');
+ $('#categories').innerHTML=[{id:'all',nombre:'Todo el menú'},...data.categories].map(c=>'<button data-category="'+esc(c.id)+'">'+(theme.template==='berries'?categoryArt(c.nombre,c.id==='all'):(safeImage(data.products.find(p=>p.categoria_id===c.id)?.imagen)?'<img alt="" src="'+esc(safeImage(data.products.find(p=>p.categoria_id===c.id)?.imagen))+'">':'<span aria-hidden="true">'+(c.id==='all'?'✦':theme.emoji)+'</span>'))+esc(c.nombre)+'</button>').join('');
  $('#categories').onclick=e=>{const b=e.target.closest('[data-category]');if(b){active=b.dataset.category;renderProducts();}};
  openDetails=mountProductViews(data,theme,id=>{if(theme.catalog||!availability(data.products.find(p=>p.id===id)||{}).orderable)return;cart[id]=Math.min(99,(cart[id]||0)+1);save();notify('Añadido a tu pedido');},favorites);
  $('#products').onclick=e=>{const favorite=e.target.closest('[data-favorite-id]');if(favorite){const id=favorite.dataset.favoriteId;favorites.toggle(id);renderProducts();([...document.querySelectorAll('[data-favorite-id]')].find(b=>b.dataset.favoriteId===id)||$('#favoritesFilter')).focus({preventScroll:true});return;}const detail=e.target.closest('[data-detail]');if(detail){openDetails(detail.dataset.detail);return;}const b=e.target.closest('[data-add]');if(b&&!theme.catalog&&availability(data.products.find(p=>p.id===b.dataset.add)||{}).orderable){cart[b.dataset.add]=Math.min(99,(cart[b.dataset.add]||0)+1);save();notify('Añadido a tu pedido');}};
@@ -49,11 +50,12 @@ try{
  document.addEventListener('menuqr:favorites',renderProducts);
  $('#surprise').onclick=()=>{const choices=data.products.filter(p=>p.disponible&&availability(p).orderable);if(!choices.length){notify('No hay productos disponibles para sugerir ahora.');return;}openDetails(choices[Math.floor(Math.random()*choices.length)].id);};
  const back=document.createElement('button');back.className='back-to-top';back.type='button';back.textContent='↑';back.setAttribute('aria-label','Volver arriba');back.hidden=true;document.body.append(back);const updateBack=()=>{back.hidden=scrollY<500;};window.addEventListener('scroll',updateBack,{passive:true});back.onclick=()=>window.scrollTo({top:0,behavior:document.body.classList.contains('motion-paused')||matchMedia('(prefers-reduced-motion: reduce)').matches||theme.motion==='ninguno'?'instant':'smooth'});
+ mountBoutique(data,theme,openDetails);
  mountGrowth(data,openDetails);
- void import('./game.js?v=play-12').then(({mountGame})=>mountGame(data.restaurant,theme)).catch(()=>{});
+ void import('./game.js?v=boutique-13').then(({mountGame})=>mountGame(data.restaurant,theme)).catch(()=>{});
  const requested=params.get('p');if(requested){if(data.products.some(p=>p.id===requested))openDetails(requested);else{history.replaceState(null,'',menuHome(location.href));notify('Este producto ya no está disponible. Puedes elegir otro del menú.');}}
  const sparkles=document.createElement('div');sparkles.className='hero-sparkles';sparkles.setAttribute('aria-hidden','true');sparkles.innerHTML='<i></i><i></i><i></i><i></i>';$('.hero').append(sparkles);
- void import('./motion.js?v=play-12').catch(()=>{});
+ void import('./motion.js?v=boutique-13').catch(()=>{});
 }catch(e){showError(e);}
 }
 function showError(e){const withoutTable=menuHome(location.href);withoutTable.searchParams.delete('m');$('#app').innerHTML='<section class="empty"><h1>No podemos mostrar el menú</h1><p>'+esc(e.message)+'</p><button id="retryMenu">Volver a intentar</button> <a href="'+esc(withoutTable.href)+'">Abrir menú sin mesa</a> <a href="./">Elegir otro menú</a></section>';$('#retryMenu').onclick=()=>location.reload();}
