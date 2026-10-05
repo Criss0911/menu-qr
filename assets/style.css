@@ -74,3 +74,5 @@ body:has(dialog[open]){overflow:hidden}
 .game-basket>.game-art{width:65px;height:58px}
 .game-tiles button .game-art{width:54px;height:54px;margin:auto}
 @media(max-width:600px){.wait-game-art>.game-art{width:75px;height:75px}.game-big>.game-art{width:46px;height:46px}}
+
+.game-overlay:has([data-again]){gap:5px}.game-overlay:has([data-again]) .game-big>.game-art{width:32px;height:32px}.game-overlay:has([data-again]) .game-final-score{font-size:28px}.game-overlay:has([data-again])>button{padding:9px 14px}
