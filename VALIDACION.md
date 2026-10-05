@@ -87,3 +87,6 @@ Versión play-12: 35 pruebas JavaScript correctas. Partida de 30 segundos compro
 ## Boutique de postres — 4 de octubre de 2026
 Versión boutique-13: 35 pruebas JavaScript correctas. Portada con foto real y enlace a la ficha verificados; catálogo, iconos y juego ilustrado revisados en navegador. Vistas de 390 y 320 px sin desbordamiento horizontal; combinación Mediano + Chocolate = Bs 27 en demo. Un fallo transitorio de conexión al catálogo se recuperó con Volver a intentar. No se modificaron datos de Supabase.
 
+
+## Personajes del minijuego — 5 de octubre de 2026
+Versión gamefix-14: todos los personajes usan trazos SVG internos con dimensiones explícitas, sin referencias a sprites externos ni emojis. Se incorporó una lámina visual para revisar las diez figuras. 37 pruebas correctas. Partida clásica revisada en navegador: dibujos visibles y puntuación activa. La causa exacta en el dispositivo del usuario no pudo reproducirse; se eliminaron las dependencias de representación que podían dejar figuras vacías.
