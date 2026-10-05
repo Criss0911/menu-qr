@@ -80,3 +80,6 @@ Fondo de postres: vista de escritorio inspeccionada, 12 decoraciones con pausa c
 ## Revisión de navegación — 4 de octubre de 2026
 Versión stable-11: 30 pruebas correctas y recorridos de navegador documentados en REVISION-NAVEGACION.md. Sin cambios de esquema ni de datos reales.
 
+
+## Minijuego — 4 de octubre de 2026
+Versión play-12: 35 pruebas JavaScript correctas. Partida de 30 segundos comprobada en navegador: puntuación, pausa sin consumir tiempo, final y récord al reabrir. Modo clásico comprobado con botones y teclado; Atrás cierra el juego. Vista de 390 px sin desbordamiento horizontal. No requiere migración SQL ni modifica pedidos.
