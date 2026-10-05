@@ -1,0 +1,8 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {makeGame,makeTreat,collect,advance,readRecord,saveRecord} from '../assets/game-core.js';
+import {cleanGrowth} from '../assets/growth-core.js';
+test('puntos, combo y picante sin puntuación negativa',()=>{const s=makeGame();assert.equal(collect(s,'pepper'),0);for(let i=0;i<4;i++)collect(s,'food');assert.equal(collect(s,'food'),3);assert.equal(s.score,7);assert.equal(collect(s,'gold'),3);collect(s,'pepper');assert.equal(s.combo,0);assert.equal(s.score,8);});
+test('cesta captura al cruzar su altura y deja pasar otros objetos',()=>{const s=makeGame();s.spawnIn=10;s.items=[{id:1,x:.5,y:.84,speed:.3,kind:'gold'},{id:2,x:.9,y:.84,speed:.3,kind:'food'}];const hits=advance(s,.1);assert.equal(hits.length,1);assert.equal(s.score,3);assert.equal(s.items.length,1);assert.equal(s.remaining,29.9);});
+test('partida acaba y no vuelve a sumar tras 30 segundos',()=>{const s=makeGame();advance(s,30,()=>.5);assert.equal(s.remaining,0);assert.equal(s.over,true);const score=s.score;assert.equal(collect(s,'gold'),0);advance(s,1);assert.equal(s.score,score);});
+test('récord aislado por clave y tolerante a almacenamiento bloqueado',()=>{const m=new Map(),store={getItem:k=>m.get(k),setItem:(k,v)=>m.set(k,v)};assert.equal(saveRecord(store,'a',9),9);assert.equal(saveRecord(store,'a',3),9);assert.equal(readRecord(store,'b'),0);assert.equal(saveRecord(undefined,'x',5),5);m.set('x','NaN');assert.equal(readRecord(store,'x'),0);});
+test('opción del administrador activa o desactiva el juego',()=>{assert.equal(cleanGrowth({juego:false}).juego,false);assert.equal(cleanGrowth({}).juego,true);assert.equal(makeTreat(()=>.1).kind,'pepper');});
