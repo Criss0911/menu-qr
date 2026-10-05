@@ -83,3 +83,7 @@ Versión stable-11: 30 pruebas correctas y recorridos de navegador documentados 
 
 ## Minijuego — 4 de octubre de 2026
 Versión play-12: 35 pruebas JavaScript correctas. Partida de 30 segundos comprobada en navegador: puntuación, pausa sin consumir tiempo, final y récord al reabrir. Modo clásico comprobado con botones y teclado; Atrás cierra el juego. Vista de 390 px sin desbordamiento horizontal. No requiere migración SQL ni modifica pedidos.
+
+## Boutique de postres — 4 de octubre de 2026
+Versión boutique-13: 35 pruebas JavaScript correctas. Portada con foto real y enlace a la ficha verificados; catálogo, iconos y juego ilustrado revisados en navegador. Vistas de 390 y 320 px sin desbordamiento horizontal; combinación Mediano + Chocolate = Bs 27 en demo. Un fallo transitorio de conexión al catálogo se recuperó con Volver a intentar. No se modificaron datos de Supabase.
+
