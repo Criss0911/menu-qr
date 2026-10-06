@@ -90,3 +90,6 @@ Versión boutique-13: 35 pruebas JavaScript correctas. Portada con foto real y e
 
 ## Personajes del minijuego — 5 de octubre de 2026
 Versión gamefix-14: todos los personajes usan trazos SVG internos con dimensiones explícitas, sin referencias a sprites externos ni emojis. Se incorporó una lámina visual para revisar las diez figuras. 37 pruebas correctas. Partida clásica revisada en navegador: dibujos visibles y puntuación activa. La causa exacta en el dispositivo del usuario no pudo reproducirse; se eliminaron las dependencias de representación que podían dejar figuras vacías.
+
+## Encabezado público — 6 de octubre de 2026
+Versión public-16: se retiran el enlace de Administración y el control de efectos del encabezado público. El acceso directo a admin.html se conserva; los QR no cambian. 37 pruebas correctas y carga del catálogo comprobada en navegador.
