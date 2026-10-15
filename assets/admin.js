@@ -1,10 +1,15 @@
+import {installIdleSession} from './idle-session.js?v=idle-19';
 import {renderGrowth} from './growth-admin.js?v=boutique-13';
 import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=boutique-13';
 import {uploadPhoto,validatePhoto} from './upload.js';
 import {appearanceEditor} from './appearance-editor.js?v=template-lock-17';
 import {client,result,demo} from './api.js?v=boutique-13';
 import {esc,safeImage} from './core.js';
-const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
+const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false,loginPending=false,sessionExpired=false,signingOut=null;
+const idle=installIdleSession({onExpire:expireSession});
+function showLogin(message=''){for(const d of document.querySelectorAll('dialog[open]'))d.close();$('#dashboard').hidden=true;$('#logout').hidden=true;$('#login').hidden=false;$('#content').textContent='';$('#editForm').innerHTML='';$('#loginForm').reset();status(message);}
+function expireSession(){sessionExpired=true;showLogin('Tu sesión terminó tras 1 hora sin actividad. Inicia sesión nuevamente.');signingOut=db.auth.signOut({scope:'local'}).catch(()=>{}).finally(()=>{signingOut=null;});}
+
 const titles={crecimiento:'Ventas y crecimiento',resultados:'Resultados',fidelidad:'Fidelidad',productos:'Productos',categorias:'Categorías',mesas:'Mesas y QR',datos:'Datos del restaurante',apariencia:'Apariencia',promociones:'Promociones',restaurantes:'Restaurantes',miembros:'Accesos'};
 const fields={
  productos:[['nombre','Nombre','text',true],['descripcion','Descripción','textarea'],['categoria_id','Categoría','select',true],['precio','Precio (Bs)','number',true],['imagen','Imagen (URL HTTPS)','url'],['destacado','Carrusel','featured'],['orden','Orden','number'],['disponible','Visible en el menú','checkbox']],
@@ -16,16 +21,18 @@ const fields={
 function status(t){$('#status').textContent=t;}
 async function start(){
  if(demo){status('Modo demo. Para administrar, conecta Supabase y cambia demo a false en config.js.');$('#loginForm button').disabled=true;$('#recover').disabled=true;return;}
- try{db=await client();db.auth.onAuthStateChange((event)=>{if(event==='PASSWORD_RECOVERY')setTimeout(passwordEditor,0);if(event==='SIGNED_OUT')location.reload();if(event==='SIGNED_IN'&&authReady)setTimeout(()=>boot().catch(e=>status(e.message)),0);});const {data,error}=await db.auth.getSession();if(error)throw error;authReady=true;if(data.session)await boot();}catch(e){status(e.message);}
+ try{db=await client();db.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){idle.stop();showLogin(sessionExpired?'Tu sesión terminó tras 1 hora sin actividad. Inicia sesión nuevamente.':'Sesión cerrada.');}if(event==='PASSWORD_RECOVERY')setTimeout(()=>{sessionExpired=false;idle.start(session,{fresh:true});passwordEditor();},0);if(event==='SIGNED_IN'&&authReady&&!loginPending&&!sessionExpired)setTimeout(()=>{if(idle.start(session))boot().catch(e=>status(e.message));},0);});const {data,error}=await db.auth.getSession();if(error)throw error;authReady=true;if(data.session&&idle.start(data.session))await boot();}catch(e){status(e.message);}
 }
-$('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;status('');try{db=await client();const f=new FormData(e.target);const {error}=await db.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});if(error)throw error;await boot();}catch(e){status(e.message);}finally{b.disabled=false;}};
+$('#loginForm').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;status('');try{db=await client();const f=new FormData(e.target);if(signingOut)await signingOut;loginPending=true;const {data,error}=await db.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});if(error)throw error;sessionExpired=false;idle.start(data.session,{fresh:true});await boot();}catch(e){status(e.message);}finally{loginPending=false;b.disabled=false;}};
 $('#logout').onclick=async()=>{const {error}=await db.auth.signOut();if(error)status(error.message);};
 $('#recover').onclick=async()=>{try{db=await client();const email=$('[name=email]').value;if(!email)throw Error('Escribe primero tu correo electrónico.');const redirect=new URL('admin.html',location.href).href;const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:redirect});if(error)throw error;status('Si existe una cuenta, recibirás un correo para restablecer la contraseña.');}catch(e){status(e.message);}};
 function passwordEditor(){openEditor('Nueva contraseña','<label>Nueva contraseña<input name="password" type="password" autocomplete="new-password" minlength="12" required></label>',async f=>{const {error}=await db.auth.updateUser({password:f.get('password')});if(error)throw error;status('Contraseña actualizada.');});}
 async function boot(){
+ if(!idle.check())return;
  superadmin=await result(db.rpc('soy_superadmin'));
  if(superadmin)restaurants=await result(db.from('restaurantes').select('*').order('nombre'));
  else{const memberships=await result(db.from('miembros').select('restaurante_id'));const ids=memberships.map(m=>m.restaurante_id);restaurants=ids.length?await result(db.from('restaurantes').select('*').in('id',ids).order('nombre')):[];}
+ if(!idle.check())return;
  $('#login').hidden=true;$('#dashboard').hidden=false;$('#logout').hidden=false;
  $('#restaurantSelect').innerHTML=restaurants.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.nombre)+'</option>').join('');
  r=restaurants.find(x=>x.id===r?.id)||restaurants.find(x=>x.slug===new URLSearchParams(location.search).get('r'))||restaurants[0];if(r)$('#restaurantSelect').value=r.id;
@@ -37,6 +44,7 @@ $('#restaurantSelect').onchange=async()=>{r=restaurants.find(x=>x.id===$('#resta
 $('#sections').onclick=async e=>{const b=e.target.closest('[data-section]');if(b){section=b.dataset.section;await guarded(render);}};
 async function guarded(fn){try{status('');await fn();}catch(e){status(e.message);}}
 async function render(){
+ if(!idle.check())return;
  document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('primary',b.dataset.section===section));
  if(!r&&section!=='restaurantes'){$('#content').textContent='Crea un restaurante para continuar.';return;}
  document.querySelector('#viewMenu').href=r?'index.html?r='+encodeURIComponent(r.slug):'./';
@@ -61,7 +69,7 @@ async function render(){
 function openEditor(title,html,save){
  $('#editForm').oninput=null;$('#editForm').onchange=null;
  $('#editorTitle').textContent=title;$('#editStatus').textContent='';$('#editForm').innerHTML=html+'<button class="primary wide">Guardar</button>';
- $('#editForm').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;try{await save(new FormData(e.target));$('#editor').close();}catch(e){$('#editStatus').textContent=e.message;}finally{b.disabled=false;}};
+ $('#editForm').onsubmit=async e=>{e.preventDefault();const b=e.submitter;b.disabled=true;try{if(!idle.check())throw Error('La sesión ha terminado. Inicia sesión nuevamente.');await save(new FormData(e.target));$('#editor').close();}catch(e){$('#editStatus').textContent=e.message;}finally{loginPending=false;b.disabled=false;}};
  if(!$('#editor').open)$('#editor').showModal();
 }
 function edit(row){
