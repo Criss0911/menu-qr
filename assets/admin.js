@@ -1,7 +1,7 @@
 import {renderGrowth} from './growth-admin.js?v=boutique-13';
 import {catalogFields,wireCatalogFields,promotionsEditor} from './catalog-editor.js?v=boutique-13';
 import {uploadPhoto,validatePhoto} from './upload.js';
-import {appearanceEditor} from './appearance-editor.js?v=boutique-13';
+import {appearanceEditor} from './appearance-editor.js?v=template-lock-17';
 import {client,result,demo} from './api.js?v=boutique-13';
 import {esc,safeImage} from './core.js';
 const $=s=>document.querySelector(s);let db,restaurants=[],r,section='productos',rows=[],categories=[],superadmin=false,qrSvg='',authReady=false;
@@ -48,7 +48,7 @@ async function render(){
  }
  if(section==='apariencia'){
  $('#content').innerHTML='<h2>Apariencia</h2><p><a href="preview-postres.html" target="_blank" rel="noopener">Explorar ejemplo de fresas y postres ↗</a></p><p>Diseño y modo de atención de '+esc(r.nombre)+'</p><button id=editAppearance class=primary>Personalizar menú</button><p><a target="_blank" rel="noopener" href="index.html?r='+encodeURIComponent(r.slug)+'">Ver menú publicado ↗</a></p>';
- $('#editAppearance').onclick=()=>{const restaurant=r;appearanceEditor(restaurant,openEditor,async payload=>{const changed=await result(db.from('restaurantes').update(payload).eq('id',restaurant.id).select('id'));if(!changed.length)throw Error('No se guardó: acceso revocado.');await boot();status('Apariencia guardada.');});};return;
+ $('#editAppearance').onclick=()=>{const restaurant=r;appearanceEditor(restaurant,openEditor,async payload=>{const changed=await result(db.from('restaurantes').update(payload).eq('id',restaurant.id).select('id'));if(!changed.length)throw Error('No se guardó: acceso revocado.');await boot();status('Apariencia guardada.');},{superadmin});};return;
  }
  if(section==='datos'){rows=[r];$('#content').innerHTML='<h2>Datos del restaurante</h2><p>'+esc(r.nombre)+' · '+esc(r.slug)+'</p><p class="muted">Moneda del MVP: bolivianos (Bs). Cambiar el identificador invalida los QR anteriores.</p><button id="editData" class="primary">Editar datos</button><button id="generalQr">QR del menú</button>';$('#editData').onclick=()=>edit(r);$('#generalQr').onclick=()=>guarded(()=>showQr(null));return;}
  rows=section==='restaurantes'?restaurants:await result(db.from(section).select('*').eq('restaurante_id',r.id).order(section==='mesas'?'numero':section==='miembros'?'usuario_id':'orden'));
